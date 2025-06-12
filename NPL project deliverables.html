@@ -1,0 +1,1562 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>交付物文档库 - 医疗器械新产品准入任务管理系统</title>
+    <link rel="stylesheet" href="styles/NPL project deliverables.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/NPL_project_deliverables_modal.css">
+    <style>
+        /* Modern List View Styles */
+        :root {
+            --row-hover-bg: #E9F5FE;
+            --zebra-bg: #FCFDFF;
+            --border-color: #E5E7EB;
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --pill-business-plan-bg: #e1f7d5;
+            --pill-business-plan-text: #4d7c0f;
+            --pill-registration-bg: #dbeafe;
+            --pill-registration-text: #1e40af;
+            --pill-market-plan-bg: #fae8ff;
+            --pill-market-plan-text: #86198f;
+            --pill-launch-plan-bg: #fff1e6;
+            --pill-launch-plan-text: #b45309;
+            --status-necessary: #D9534F;
+            --status-optional: #5BC0DE;
+        }
+
+        /* ===== LAUNCH MILESTONE START ===== */
+        .kanban-board {
+            position: relative;
+        }
+
+        .launch-milestone {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 94%; /* Place after the 3rd of 4 data columns */
+            transform: translateX(-50%); /* Center the line on the boundary */
+            width: 4px;
+            background: linear-gradient(to bottom, #FF8C00, #FF4500);
+            z-index: 5;
+            pointer-events: none;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .launch-milestone-content {
+            position: sticky;
+            top: 110px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .launch-icon {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 10px;
+            pointer-events: auto;
+        }
+
+        .launch-milestone-text {
+            /* position: sticky, top, and margins are now handled by the wrapper and icon */
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: #C75200;
+            letter-spacing: 2px;
+            
+            background-color: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(4px);
+            padding: 16px 6px;
+            border-radius: 8px;
+            
+            margin-top: 10px; /* Add some space from the top of the board */
+            margin-left: 0px; /* Position text to the right, away from the bar */
+            
+            height: fit-content;
+            width: fit-content;
+            pointer-events: auto;
+            text-shadow: 0 0 8px rgba(255,255,255,0.5);
+        }
+        /* ===== LAUNCH MILESTONE END ===== */
+
+        #list-view {
+            display: none; /* Initially hidden, controlled by JS */
+            flex-direction: column;
+            gap: 1rem;
+            background-color: #F8F9FA;
+        }
+
+        #list-view.active {
+            display: flex;
+        }
+
+        /* Control Bar */
+        .list-view-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #fff;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .filters {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .filter-select {
+            min-width: 150px;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            background-color: #fff;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .filter-select:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+        }
+
+        .clear-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            background-color: transparent;
+            color: #3B82F6;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+        .clear-btn:hover {
+            background-color: #EFF6FF;
+        }
+        
+        .list-view-controls .actions .new-deliverable-btn {
+            background-color: #2563EB;
+            color: white;
+            padding: 0.6rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background-color 0.2s;
+        }
+        .list-view-controls .actions .new-deliverable-btn:hover {
+             background-color: #1D4ED8;
+        }
+        
+        .bulk-actions-bar {
+            background-color: #3B82F6;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transform: translateY(-20px);
+            opacity: 0;
+            visibility: hidden;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .bulk-actions-bar.visible {
+            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .bulk-actions-bar button {
+            background: #ffffff20;
+            border: 1px solid #ffffff80;
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            margin-left: 0.5rem;
+            cursor: pointer;
+        }
+        .bulk-actions-bar button:hover {
+             background: #ffffff30;
+        }
+
+
+        /* Table Container */
+        .list-table-container {
+            background-color: #fff;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            overflow: hidden; /* Ensures child elements adhere to border-radius */
+            position: relative;
+        }
+        
+        /* Table Styles */
+        .list-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .list-table th, .list-table td {
+            padding: 0.5rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        .list-table thead {
+            background-color: #F9FAFB;
+        }
+
+        .list-table th {
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            user-select: none;
+            transition: color 0.2s;
+        }
+        .list-table th:hover {
+            color: var(--text-primary);
+        }
+
+        .list-table th .sort-icon {
+            margin-left: 0.25rem;
+            opacity: 0.5;
+            transition: opacity 0.2s, transform 0.2s;
+            display: inline-block;
+        }
+        .list-table th .sort-icon.active {
+            opacity: 1;
+            color: #3B82F6;
+        }
+        .list-table th .sort-icon.desc {
+            transform: rotate(180deg);
+        }
+        
+        .list-table tbody tr {
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        .list-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .list-table tbody tr:nth-child(even) {
+            background-color: var(--zebra-bg);
+        }
+
+        .list-table tbody tr:hover {
+            background-color: var(--row-hover-bg);
+        }
+
+        .list-table tbody tr.selected {
+            background-color: #DBEAFE;
+        }
+        
+        .list-table td {
+            color: var(--text-primary);
+            font-size: 0.85rem;
+        }
+
+        /* Column-specific Styles */
+        .col-checkbox { width: 48px; text-align: center; }
+        .col-checkbox input { cursor: pointer; }
+        .col-deliverable { font-weight: 500; }
+        .col-phase .phase-pill {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+        .phase-pill[data-phase-key="1"] { background-color: var(--pill-business-plan-bg); color: var(--pill-business-plan-text); }
+        .phase-pill[data-phase-key="2"] { background-color: var(--pill-registration-bg); color: var(--pill-registration-text); }
+        .phase-pill[data-phase-key="3"] { background-color: var(--pill-market-plan-bg); color: var(--pill-market-plan-text); }
+        .phase-pill[data-phase-key="4"] { background-color: var(--pill-launch-plan-bg); color: var(--pill-launch-plan-text); }
+        
+        .col-necessity .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .col-necessity .status-indicator i { font-size: 0.8rem; line-height: 1; }
+        
+        .col-template a, .col-actions .action-btn {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 1.25rem; /* Larger click area */
+            display: inline-block;
+            padding: 4px;
+            border-radius: 4px;
+        }
+        .col-template a:hover, .col-actions .action-btn:hover {
+            color: var(--text-primary);
+            background-color: #E5E7EB;
+        }
+
+        .col-tasks a {
+            color: #2563EB;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .col-tasks a:hover {
+            text-decoration: underline;
+        }
+
+        .col-actions {
+            text-align: center;
+        }
+        .col-actions .kebab-menu {
+            position: relative;
+            display: inline-block;
+        }
+        .col-actions .kebab-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: calc(100% + 5px);
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 10;
+            width: 150px;
+            overflow: hidden;
+        }
+        .col-actions .kebab-dropdown.show {
+            display: block;
+        }
+        .col-actions .kebab-dropdown-item {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: none;
+            border: none;
+            text-align: left;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .col-actions .kebab-dropdown-item:hover {
+            background: #F3F4F6;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            display: none; /* Hidden by default */
+            text-align: center;
+            padding: 4rem 2rem;
+            position: absolute;
+            top: 60px; /* Below header */
+            width: 100%;
+            color: var(--text-secondary);
+        }
+        .empty-state.visible {
+            display: block;
+        }
+        .empty-state .empty-state-icon {
+            font-size: 6rem;
+            margin-bottom: 1.5rem;
+            display: block;
+            color: #D1D5DB;
+        }
+        .empty-state h3 {
+            font-size: 1.25rem;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+        .empty-state p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+        .empty-state .clear-btn-empty {
+            background-color: #2563EB;
+            color: white;
+            padding: 0.6rem 1rem;
+            border: none;
+            border-radius: 6px;
+        }
+
+        /* Skeleton Loader */
+        .skeleton-loader {
+            display: none; /* Hidden by default */
+        }
+        .skeleton-loader.visible {
+            display: block;
+        }
+        .skeleton-row {
+            display: flex;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            gap: 1.5rem;
+            align-items: center;
+        }
+         .skeleton-row:last-child {
+            border-bottom: none;
+        }
+        .skeleton-item {
+            background-color: #E5E7EB;
+            border-radius: 4px;
+            animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        .skeleton-row .sk-checkbox { height: 20px; width: 20px; flex-shrink: 0; }
+        .skeleton-row .sk-text-long { height: 20px; width: 30%; }
+        .skeleton-row .sk-text-medium { height: 20px; width: 20%; }
+        .skeleton-row .sk-text-short { height: 20px; width: 15%; }
+        .skeleton-row .sk-pill { height: 28px; width: 120px; border-radius: 999px;}
+        .skeleton-row .sk-icon { height: 24px; width: 24px; }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <header class="top-nav">
+        <div class="logo">
+            <img loading="lazy" src="resources/BS-logo-cn.png" alt="Boston Scientific Logo" style="width: auto; height: 33px;">
+            <h1>WATCHMAN FLX Pro 新产品准入项目</h1>
+        </div>
+        
+        <nav>
+            <ul>
+                <li><a href="NPL project detail.html"><i class="ri-dashboard-line"></i> 进度看板</a></li>
+                <li class="active"><a href="#"><i class="ri-file-list-3-line"></i> 文档库</a></li>
+                <li><a href="#"><i class="ri-history-line"></i> 审计日志</a></li>
+                <li><a href="#"><i class="ri-settings-line"></i> 设置</a></li>
+            </ul>
+        </nav>
+        <div class="user-info">
+            <div class="notifications">
+                <i class="ri-notification-3-line"></i>
+                <span class="badge">3</span>
+            </div>
+            <div class="avatar">
+                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="用户头像">
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- 主内容区 -->
+        <main class="content">
+            <div class="page-header">
+                <h2>交付物文档库</h2>
+                <div class="kanban-legend">
+                    <span class="legend-item" data-phase="Business Plan - PLT validation"><span class="legend-color" style="background-color: #DAF2D0;"></span> Business Plan - PLT validation</span>
+                    <span class="legend-item" data-phase="Registration"><span class="legend-color" style="background-color: #C0E6F5;"></span> Registration</span>
+                    <span class="legend-item" data-phase="Market Plan - Launch Plan"><span class="legend-color" style="background-color: #F2CEEF;"></span> Market Plan - Launch Plan</span>
+                    <span class="legend-item" data-phase="Launch Plan - Go"><span class="legend-color" style="background-color: #FBE2D5;"></span> Launch Plan - Go</span>
+                    <span class="legend-separator"></span>
+                    <span class="legend-item" data-status="submitted"><i class="ri-checkbox-circle-fill submitted"></i> 已提交</span>
+                    <span class="legend-item" data-status="pending"><i class="ri-checkbox-blank-circle-line pending"></i> 未提交</span>
+                    <span class="legend-separator"></span>
+                    <span class="legend-item" data-necessity="necessary"><i class="ri-star-fill necessary"></i> 必要</span>
+                    <span class="legend-item" data-necessity="optional"><i class="ri-star-line optional"></i> 可选</span>
+                </div>
+                <div class="controls">
+                    <div class="view-switcher">
+                        <button class="view-btn active" id="kanban-view-btn"><i class="ri-layout-grid-fill"></i> 看板</button>
+                        <button class="view-btn" id="list-view-btn"><i class="ri-list-check-2"></i> 列表</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="deliverables-container">
+                <div id="kanban-view" class="view active">
+                    <div class="kanban-board">
+                        <div class="launch-milestone">
+                            <div class="launch-milestone-content">
+                                <img src="resources/rocket icon.png" alt="Launch" class="launch-icon">
+                                <div class="launch-milestone-text">上市</div>
+                            </div>
+                        </div>
+                        <div class="kanban-header-row">
+                            <div class="kanban-header-cell empty"></div>
+                            <div class="kanban-header-cell">上市前36个月</div>
+                            <div class="kanban-header-cell">上市前24个月至12个月</div>
+                            <div class="kanban-header-cell">上市前6个月</div>
+                            <div class="kanban-header-cell">上市后6个月</div>
+                        </div>
+
+                        <!-- Workstream Rows -->
+                        <div class="kanban-row">
+                            <div class="workstream-header">Understand the Market</div>
+                            <div class="kanban-cell">
+                                <div class="card" data-phase="Business Plan - PLT validation">
+                                    <div class="card-main"><strong class="card-title">Competitive landscape & summary</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes">
+                                            <i class="ri-star-fill necessary" title="必要交付物"></i>
+                                            <i class="ri-checkbox-circle-fill submitted" title="已提交"></i>
+                                        </div>
+                                        <a href="resources/CompetitiveLandscape&Summary_Sample.docx" class="template-link" download><i class="ri-download-2-line"></i>模板</a>
+                                    </div>
+                                </div>
+                                <div class="card" data-phase="Business Plan - PLT validation">
+                                    <div class="card-main"><strong class="card-title">Customer Strategy and VOC</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes">
+                                            <i class="ri-star-fill necessary" title="必要交付物"></i>
+                                            <i class="ri-checkbox-circle-fill submitted" title="已提交"></i>
+                                        </div>
+                                        <a href="resources/CustomerStrategy&VOC_Sample.xlsx" class="template-link" download><i class="ri-download-2-line"></i>模板</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="kanban-cell"></div>
+                            <div class="kanban-cell"></div>
+                            <div class="kanban-cell"></div>
+                        </div>
+                        <div class="kanban-row">
+                            <div class="workstream-header">Obtain Access</div>
+                            <div class="kanban-cell">
+                                <div class="card" data-phase="Business Plan - PLT validation">
+                                    <div class="card-main"><strong class="card-title">BSC Pricing</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-circle-fill submitted" title="已提交"></i></div>
+                                        <a href="#" class="template-link"><i class="ri-download-2-line"></i>模板</a>
+                                    </div>
+                                </div>
+                                <div class="card" data-phase="Business Plan - PLT validation">
+                                    <div class="card-main"><strong class="card-title">KOL Strategy</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-circle-fill submitted" title="已提交"></i></div>
+                                        <a href="#" class="template-link"><i class="ri-download-2-line"></i>模板</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="kanban-cell">
+                                <div class="card" data-phase="Market Plan - Launch Plan">
+                                    <div class="card-main"><strong class="card-title">Market Access Assesment</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-blank-circle-line pending" title="未提交"></i></div>
+                                        <a href="#" class="template-link"><i class="ri-download-2-line"></i>模板</a>
+                                    </div>
+                                </div>
+                                <div class="card" data-phase="Market Plan - Launch Plan">
+                                    <div class="card-main"><strong class="card-title">BSC Reimbursement Consideration</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-blank-circle-line pending" title="未提交"></i></div>
+                                        <a href="#" class="template-link"><i class="ri-download-2-line"></i>模板</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="kanban-cell">
+                                <div class="card" data-phase="Launch Plan - Go">
+                                    <div class="card-main"><strong class="card-title">Loading Price</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-blank-circle-line pending" title="未提交"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="kanban-cell"></div>
+                        </div>
+                        <div class="kanban-row">
+                            <div class="workstream-header">Engage the Market</div>
+                            <div class="kanban-cell">
+                                <div class="card" data-phase="Business Plan - PLT validation">
+                                    <div class="card-main"><strong class="card-title">Regulatory Strategy</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-circle-fill submitted" title="已提交"></i></div>
+                                        <a href="#" class="template-link"><i class="ri-download-2-line"></i>模板</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="kanban-cell">
+                                <div class="card" data-phase="Market Plan - Launch Plan">
+                                    <div class="card-main"><strong class="card-title">Conference, Congress and Meeting Plan</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-blank-circle-line pending" title="未提交"></i></div>
+                                        <a href="#" class="template-link"><i class="ri-download-2-line"></i>模板</a>
+                                    </div>
+                                </div>
+                                <div class="card" data-phase="Market Plan - Launch Plan">
+                                    <div class="card-main"><strong class="card-title">Distribution Channel Strategy</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-blank-circle-line pending" title="未提交"></i></div>
+                                        <a href="#" class="template-link"><i class="ri-download-2-line"></i>模板</a>
+                                    </div>
+                                </div>
+                                <div class="card" data-phase="Market Plan - Launch Plan">
+                                    <div class="card-main"><strong class="card-title">Communication Plan</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-blank-circle-line pending" title="未提交"></i></div>
+                                        <a href="#" class="template-link"><i class="ri-download-2-line"></i>模板</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="kanban-cell"></div>
+                            <div class="kanban-cell"></div>
+                        </div>
+                        <div class="kanban-row">
+                            <div class="workstream-header">Generate Evidence</div>
+                             <div class="kanban-cell"></div>
+                            <div class="kanban-cell">
+                                <div class="card" data-phase="Market Plan - Launch Plan">
+                                    <div class="card-main"><strong class="card-title">Evidence Generation Strategy</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-blank-circle-line pending" title="未提交"></i></div>
+                                        <a href="#" class="template-link"><i class="ri-download-2-line"></i>模板</a>
+                                    </div>
+                                </div>
+                                <div class="card" data-phase="Market Plan - Launch Plan">
+                                    <div class="card-main"><strong class="card-title">Evidence Generation Plan</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-blank-circle-line pending" title="未提交"></i></div>
+                                        <a href="#" class="template-link"><i class="ri-download-2-line"></i>模板</a>
+                                    </div>
+                                </div>
+                                <div class="card" data-phase="Market Plan - Launch Plan">
+                                    <div class="card-main"><strong class="card-title">Claims Matrix Integration</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-blank-circle-line pending" title="未提交"></i></div>
+                                        <a href="#" class="template-link"><i class="ri-download-2-line"></i>模板</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="kanban-cell"></div>
+                            <div class="kanban-cell"></div>
+                        </div>
+                        <div class="kanban-row">
+                            <div class="workstream-header">Differentiate the Brand</div>
+                            <div class="kanban-cell">
+                                <div class="card" data-phase="Business Plan - PLT validation">
+                                    <div class="card-main"><strong class="card-title">Target Product Profile</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-circle-fill submitted" title="已提交"></i></div>
+                                        <a href="#" class="template-link"><i class="ri-download-2-line"></i>模板</a>
+                                    </div>
+                                </div>
+                                <div class="card" data-phase="Business Plan - PLT validation">
+                                    <div class="card-main"><strong class="card-title">Marketing Objective Source of Volume</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-circle-fill submitted" title="已提交"></i></div>
+                                        <a href="#" class="template-link"><i class="ri-download-2-line"></i>模板</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="kanban-cell">
+                                <div class="card" data-phase="Market Plan - Launch Plan">
+                                    <div class="card-main"><strong class="card-title">BSC Campagin Evaluation</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-blank-circle-line pending" title="未提交"></i></div>
+                                        <a href="#" class="template-link"><i class="ri-download-2-line"></i>模板</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="kanban-cell"></div>
+                            <div class="kanban-cell"></div>
+                        </div>
+                        <div class="kanban-row">
+                            <div class="workstream-header">Deliver the Brand</div>
+                            <div class="kanban-cell">
+                                <div class="card" data-phase="Business Plan - PLT validation">
+                                    <div class="card-main"><strong class="card-title">Value Proposition & Portfolio Planning</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-circle-fill submitted" title="已提交"></i></div>
+                                        <a href="#" class="template-link"><i class="ri-download-2-line"></i>模板</a>
+                                    </div>
+                                </div>
+                                <div class="card" data-phase="Business Plan - PLT validation">
+                                    <div class="card-main"><strong class="card-title">Customer Segmentation</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-circle-fill submitted" title="已提交"></i></div>
+                                        <a href="#" class="template-link"><i class="ri-download-2-line"></i>模板</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="kanban-cell">
+                                <div class="card" data-phase="Market Plan - Launch Plan">
+                                    <div class="card-main"><strong class="card-title">Sales Message</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-blank-circle-line pending" title="未提交"></i></div>
+                                        <a href="#" class="template-link"><i class="ri-download-2-line"></i>模板</a>
+                                    </div>
+                                </div>
+                                <div class="card" data-phase="Market Plan - Launch Plan">
+                                    <div class="card-main"><strong class="card-title">Commercialization Risk</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-blank-circle-line pending" title="未提交"></i></div>
+                                        <a href="#" class="template-link"><i class="ri-download-2-line"></i>模板</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="kanban-cell"></div>
+                            <div class="kanban-cell"></div>
+                        </div>
+                        <div class="kanban-row">
+                            <div class="workstream-header">Establish Governance</div>
+                            <div class="kanban-cell">
+                                <div class="card" data-phase="Business Plan - PLT validation">
+                                    <div class="card-main"><strong class="card-title">Financial Evaluation</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-circle-fill submitted" title="已提交"></i></div>
+                                        <a href="#" class="template-link"><i class="ri-download-2-line"></i>模板</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="kanban-cell">
+                                <div class="card" data-phase="Market Plan - Launch Plan">
+                                    <div class="card-main"><strong class="card-title">Marketing Launch Budge</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-blank-circle-line pending" title="未提交"></i></div>
+                                        <a href="#" class="template-link"><i class="ri-download-2-line"></i>模板</a>
+                                    </div>
+                                </div>
+                                <div class="card" data-phase="Market Plan - Launch Plan">
+                                    <div class="card-main"><strong class="card-title">Compliance Guidelines</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-blank-circle-line pending" title="未提交"></i></div>
+                                        <a href="#" class="template-link"><i class="ri-download-2-line"></i>模板</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="kanban-cell"></div>
+                            <div class="kanban-cell"></div>
+                        </div>
+                        <div class="kanban-row">
+                            <div class="workstream-header">Launch Logistics</div>
+                            <div class="kanban-cell"></div>
+                            <div class="kanban-cell"></div>
+                            <div class="kanban-cell">
+                                <div class="card" data-phase="Launch Plan - Go">
+                                    <div class="card-main"><strong class="card-title">Demand Forecast</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-blank-circle-line pending" title="未提交"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="kanban-cell"></div>
+                        </div>
+                        <div class="kanban-row">
+                            <div class="workstream-header">Activate Education</div>
+                            <div class="kanban-cell"></div>
+                            <div class="kanban-cell">
+                                <div class="card" data-phase="Market Plan - Launch Plan">
+                                    <div class="card-main"><strong class="card-title">BSC HCP Training Strategy</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-blank-circle-line pending" title="未提交"></i></div>
+                                        <a href="#" class="template-link"><i class="ri-download-2-line"></i>模板</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="kanban-cell"></div>
+                            <div class="kanban-cell"></div>
+                        </div>
+                        <div class="kanban-row">
+                            <div class="workstream-header">Marketing Summary</div>
+                            <div class="kanban-cell"></div>
+                            <div class="kanban-cell">
+                                <div class="card" data-phase="Market Plan - Launch Plan">
+                                    <div class="card-main"><strong class="card-title">BSC Launch Qualitative Objective</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-blank-circle-line pending" title="未提交"></i></div>
+                                        <a href="#" class="template-link"><i class="ri-download-2-line"></i>模板</a>
+                                    </div>
+                                </div>
+                                <div class="card" data-phase="Market Plan - Launch Plan">
+                                    <div class="card-main"><strong class="card-title">BSC Launch Strategy Summary</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-blank-circle-line pending" title="未提交"></i></div>
+                                        <a href="#" class="template-link"><i class="ri-download-2-line"></i>模板</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="kanban-cell"></div>
+                            <div class="kanban-cell"></div>
+                        </div>
+                        <div class="kanban-row">
+                            <div class="workstream-header">Portfolio Management</div>
+                            <div class="kanban-cell">
+                                <div class="card" data-phase="Business Plan - PLT validation">
+                                    <div class="card-main"><strong class="card-title">PLT validation</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-circle-fill submitted" title="已提交"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="kanban-cell"></div>
+                            <div class="kanban-cell"></div>
+                            <div class="kanban-cell"></div>
+                        </div>
+                        <div class="kanban-row">
+                            <div class="workstream-header">RA & MA</div>
+                            <div class="kanban-cell">
+                                <div class="card" data-phase="Business Plan - PLT validation">
+                                    <div class="card-main"><strong class="card-title">Registration Strategy</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-circle-fill submitted" title="已提交"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="kanban-cell">
+                                <div class="card" data-phase="Registration">
+                                    <div class="card-main"><strong class="card-title">Registration Kickoff</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-circle-fill submitted" title="已提交"></i></div>
+                                    </div>
+                                </div>
+                                <div class="card" data-phase="Registration">
+                                    <div class="card-main"><strong class="card-title">Sample apply in Emars</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-circle-fill submitted" title="已提交"></i></div>
+                                    </div>
+                                </div>
+                                <div class="card" data-phase="Registration">
+                                    <div class="card-main"><strong class="card-title">Type testing</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-blank-circle-line pending" title="未提交"></i></div>
+                                    </div>
+                                </div>
+                                <div class="card" data-phase="Registration">
+                                    <div class="card-main"><strong class="card-title">Clinical evaluation</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-checkbox-blank-circle-line pending" title="可选"></i></div>
+                                    </div>
+                                </div>
+                                <div class="card" data-phase="Registration">
+                                    <div class="card-main"><strong class="card-title">NMPA submission</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-blank-circle-line pending" title="未提交"></i></div>
+                                    </div>
+                                </div>
+                                <div class="card" data-phase="Registration">
+                                    <div class="card-main"><strong class="card-title">License release</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-blank-circle-line pending" title="未提交"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="kanban-cell"></div>
+                            <div class="kanban-cell"></div>
+                        </div>
+                         <div class="kanban-row">
+                            <div class="workstream-header">HEMA Access & Listing</div>
+                            <div class="kanban-cell"></div>
+                            <div class="kanban-cell"></div>
+                            <div class="kanban-cell">
+                                <div class="card" data-phase="Launch Plan - Go">
+                                    <div class="card-main"><strong class="card-title">C-code</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-blank-circle-line pending" title="未提交"></i></div>
+                                    </div>
+                                </div>
+                                <div class="card" data-phase="Launch Plan - Go">
+                                    <div class="card-main"><strong class="card-title">Surgical Procedure</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-blank-circle-line pending" title="未提交"></i></div>
+                                    </div>
+                                </div>
+                                <div class="card" data-phase="Launch Plan - Go">
+                                    <div class="card-main"><strong class="card-title">Docking with provincial code</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-blank-circle-line pending" title="未提交"></i></div>
+                                    </div>
+                                </div>
+                                <div class="card" data-phase="Launch Plan - Go">
+                                    <div class="card-main"><strong class="card-title">Listing</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-blank-circle-line pending" title="未提交"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="kanban-cell"></div>
+                        </div>
+                        <div class="kanban-row">
+                            <div class="workstream-header">Operation Readiness</div>
+                            <div class="kanban-cell"></div>
+                            <div class="kanban-cell"></div>
+                            <div class="kanban-cell">
+                                <div class="card" data-phase="Launch Plan - Go">
+                                    <div class="card-main"><strong class="card-title">Import classification</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-blank-circle-line pending" title="未提交"></i></div>
+                                    </div>
+                                </div>
+                                <div class="card" data-phase="Launch Plan - Go">
+                                    <div class="card-main"><strong class="card-title">Localization label & IFU</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-blank-circle-line pending" title="未提交"></i></div>
+                                    </div>
+                                </div>
+                                <div class="card" data-phase="Launch Plan - Go">
+                                    <div class="card-main"><strong class="card-title">Material master data (SAP/DMS)</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-blank-circle-line pending" title="未提交"></i></div>
+                                    </div>
+                                </div>
+                                <div class="card" data-phase="Launch Plan - Go">
+                                    <div class="card-main"><strong class="card-title">Pricing master data (T1)</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-blank-circle-line pending" title="未提交"></i></div>
+                                    </div>
+                                </div>
+                                <div class="card" data-phase="Launch Plan - Go">
+                                    <div class="card-main"><strong class="card-title">Channel authorization & Pricing (T2)</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-blank-circle-line pending" title="未提交"></i></div>
+                                    </div>
+                                </div>
+                                <div class="card" data-phase="Launch Plan - Go">
+                                    <div class="card-main"><strong class="card-title">Distribution qualification (T1&T2)</strong></div>
+                                    <div class="card-actions">
+                                        <div class="card-attributes"><i class="ri-star-fill necessary" title="必要交付物"></i><i class="ri-checkbox-blank-circle-line pending" title="未提交"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="kanban-cell"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="list-view" class="view">
+                    <div class="list-view-controls">
+                        <div class="filters">
+                            <select id="timeframeFilter" class="filter-select" title="按时间周期筛选">
+                                <option value="all">所有时间周期</option>
+                            </select>
+                            <select id="workstreamFilter" class="filter-select" title="按工作流程筛选">
+                                <option value="all">所有工作流程</option>
+                            </select>
+                            <select id="phaseFilter" class="filter-select" title="按所属阶段筛选">
+                                <option value="all">所有阶段</option>
+                            </select>
+                            <select id="necessityFilter" class="filter-select" title="按必要性筛选">
+                                <option value="all">所有必要性</option>
+                                <option value="Necessary">必要</option>
+                                <option value="Optional">可选</option>
+                            </select>
+                            <button id="clearFiltersBtn" class="clear-btn" title="清除所有筛选条件">
+                                <i class="ri-refresh-line"></i>
+                                <span>清除</span>
+                            </button>
+                        </div>
+                        <div class="actions">
+                            <button class="new-deliverable-btn">
+                                <i class="ri-add-line"></i>
+                                <span>新建交付物</span>
+                            </button>
+                        </div>
+                    </div>
+
+                
+                    <div class="list-table-container">
+                        <div class="skeleton-loader" id="skeletonLoader">
+                           <!-- Skeleton rows will be inserted here by JS -->
+                        </div>
+
+                        <table class="list-table" id="deliverablesTable">
+						<thead>
+							<tr>
+                                    <th class="col-deliverable" data-sort="name">交付物名称 <i class="ri-arrow-up-down-line sort-icon"></i></th>
+                                    <th class="col-workstream" data-sort="workstream">工作流程 <i class="ri-arrow-up-down-line sort-icon"></i></th>
+                                    <th class="col-timeframe" data-sort="timeframeKey">时间周期 <i class="ri-arrow-up-down-line sort-icon"></i></th>
+                                    <th class="col-phase" data-sort="phaseKey">所属阶段 <i class="ri-arrow-up-down-line sort-icon"></i></th>
+                                    <th class="col-necessity" data-sort="necessity">必要性 <i class="ri-arrow-up-down-line sort-icon"></i></th>
+                                    <th class="col-template">模板</th>
+                                    <th class="col-tasks">关联任务</th>
+                                    <th class="col-actions">操作</th>
+							</tr>
+						</thead>
+                            <tbody id="deliverablesTbody">
+                                <!-- Deliverable rows will be dynamically inserted here -->
+						</tbody>
+					</table>
+                
+                        <div class="empty-state" id="emptyState">
+                            <i class="ri-folder-open-line empty-state-icon"></i>
+                            <h3>未找到匹配的交付物</h3>
+                            <p>请尝试调整或清除筛选条件以查看更多内容。</p>
+                            <button class="clear-btn-empty" id="clearFiltersBtnEmpty">清除筛选</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Deliverable Detail Modal -->
+    <div class="deliverable-modal-backdrop" id="deliverableModalBackdrop"></div>
+    <div class="deliverable-modal" id="deliverableModal">
+        <div class="modal-header">
+            <h2 id="modalTitle">Competitive landscape & summary</h2>
+            <button class="modal-close-btn" id="closeModalBtn"><i class="ri-close-line"></i></button>
+        </div>
+        <div class="modal-content">
+            <!-- Left Pane: Information -->
+            <div class="info-pane">
+                <div class="info-section">
+                    <h3>基本信息</h3>
+                    <dl class="info-grid">
+                        <dt>工作流程</dt>
+                        <dd id="modalWorkstream">Understand the Market</dd>
+                        <dt>时间周期</dt>
+                        <dd id="modalTimeframe">上市前36个月</dd>
+                        <dt>所属阶段</dt>
+                        <dd><span id="modalPhase" class="phase-pill" data-phase="Business Plan - PLT validation">Business Plan - PLT validation</span></dd>
+                        <dt>必要性</dt>
+                        <dd id="modalNecessity">必要交付物</dd>
+                    </dl>
+                </div>
+                <div class="info-section">
+                    <h3>关联任务</h3>
+                    <p>此交付物与以下任务相关联...</p>
+                    <!-- Associated tasks can be listed here -->
+                </div>
+            </div>
+            <!-- Right Pane: Interaction -->
+            <div class="interaction-pane">
+                <div class="interaction-section attachment-hub">
+                    <h3>附件管理</h3>
+                    <button class="download-template-btn">
+                        <i class="ri-download-2-line"></i>
+                        下载模板
+                    </button>
+                    <div class="submitted-docs-list">
+                        <h4>已提交文档</h4>
+                        <ul>
+                            <li>
+                                <i class="doc-icon word ri-file-word-2-line"></i>
+                                <div class="doc-details">
+                                    <div class="filename">Competitive_Landscape_v2.docx</div>
+                                    <div class="meta">由 <strong>张晓芳</strong> 于 2023-05-20 上传</div>
+                                </div>
+                                <div class="doc-actions">
+                                    <button title="Preview"><i class="ri-eye-line"></i></button>
+                                    <button title="Download"><i class="ri-download-cloud-2-line"></i></button>
+                                </div>
+                            </li>
+                            <li>
+                                <i class="doc-icon excel ri-file-excel-2-line"></i>
+                                <div class="doc-details">
+                                    <div class="filename">Market_Share_Analysis.xlsx</div>
+                                    <div class="meta">由 <strong>李娜</strong> 于 2023-05-18 上传</div>
+                                </div>
+                                <div class="doc-actions">
+                                    <button title="Preview"><i class="ri-eye-line"></i></button>
+                                    <button title="Download"><i class="ri-download-cloud-2-line"></i></button>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="file-uploader" id="fileUploader">
+                        <div class="uploader-content">
+                             <i class="ri-upload-cloud-2-line upload-icon"></i>
+                            <p>拖拽文件到此处, 或 <label for="fileInput" class="upload-btn">点击选择</label></p>
+                            <input type="file" id="fileInput" hidden multiple>
+                        </div>
+                        <div class="upload-progress">
+                            <!-- JS will populate this area -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="interaction-section collaboration-center">
+                     <div class="tabs">
+                        <button class="tab-btn active" data-tab="comments">评论</button>
+                        <button class="tab-btn" data-tab="history">历史记录</button>
+                    </div>
+                    <div id="comments" class="tab-content active">
+                        <div class="comment-list">
+                            <div class="comment">
+                                <div class="comment-avatar"><img src="https://randomuser.me/api/portraits/men/32.jpg" alt=""></div>
+                                <div class="comment-main">
+                                    <div class="comment-header">
+                                        <span class="author">刘军</span>
+                                        <span class="timestamp">3天前</span>
+                                    </div>
+                                    <p class="comment-body">报告中缺少了对竞品X的分析，请补充。</p>
+                                </div>
+                            </div>
+                             <div class="comment">
+                                <div class="comment-avatar"><img src="https://randomuser.me/api/portraits/women/44.jpg" alt=""></div>
+                                <div class="comment-main">
+                                    <div class="comment-header">
+                                        <span class="author">张晓芳</span>
+                                        <span class="timestamp">2天前</span>
+                                    </div>
+                                    <p class="comment-body">@刘军 已在V2版本中更新，请查阅。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="history" class="tab-content">
+                        <ul class="history-timeline">
+                           <li class="history-item">
+                               <div class="history-content">
+                                   <span class="actor">张晓芳</span> 上传了新版本 <span class="file">"Competitive_Landscape_v2.docx"</span>.
+                                   <span class="timestamp">2023-05-20 10:45</span>
+                               </div>
+                           </li>
+                           <li class="history-item">
+                               <div class="history-content">
+                                   <span class="actor">李娜</span> 上传了文件 <span class="file">"Market_Share_Analysis.xlsx"</span>.
+                                   <span class="timestamp">2023-05-18 16:21</span>
+                               </div>
+                           </li>
+                           <li class="history-item">
+                               <div class="history-content">
+                                   <span class="actor">系统</span> 创建了此交付物卡片.
+                                   <span class="timestamp">2023-04-01 09:00</span>
+                               </div>
+                           </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="scripts/NPL project deliverables.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // --- View Toggling ---
+        const kanbanViewBtn = document.getElementById('kanban-view-btn');
+        const listViewBtn = document.getElementById('list-view-btn');
+        const kanbanView = document.getElementById('kanban-view');
+        const listView = document.getElementById('list-view');
+        const content = document.querySelector('main.content');
+
+        kanbanViewBtn.addEventListener('click', () => {
+            kanbanView.classList.add('active');
+            listView.classList.remove('active');
+            kanbanViewBtn.classList.add('active');
+            listViewBtn.classList.remove('active');
+            if (content) content.classList.remove('list-view-active');
+        });
+
+        listViewBtn.addEventListener('click', () => {
+            listView.classList.add('active');
+            kanbanView.classList.remove('active');
+            listViewBtn.classList.add('active');
+            kanbanViewBtn.classList.remove('active');
+            if (content) content.classList.add('list-view-active');
+            // Initial render if it hasn't been done yet
+            if (!listView.dataset.initialized) {
+                initializeListView();
+                listView.dataset.initialized = 'true';
+            }
+        });
+
+        // --- Modal Logic (largely unchanged) ---
+        const modal = document.getElementById('deliverableModal');
+        const backdrop = document.getElementById('deliverableModalBackdrop');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const deliverableCards = document.querySelectorAll('.card');
+
+        const openModal = () => {
+            backdrop.classList.add('visible');
+            modal.classList.add('visible');
+            document.body.classList.add('modal-open');
+        };
+
+        const closeModal = () => {
+            backdrop.classList.remove('visible');
+            modal.classList.remove('visible');
+            document.body.classList.remove('modal-open');
+        };
+        
+        closeModalBtn.addEventListener('click', closeModal);
+        backdrop.addEventListener('click', closeModal);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // --- File Uploader Logic (unchanged) ---
+        const uploader = document.getElementById('fileUploader');
+        const fileInput = document.getElementById('fileInput');
+        uploader.addEventListener('dragover', (e) => { e.preventDefault(); uploader.classList.add('drag-over'); });
+        uploader.addEventListener('dragleave', () => { uploader.classList.remove('drag-over'); });
+        uploader.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploader.classList.remove('drag-over');
+            if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+        });
+        uploader.querySelector('.upload-btn').addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', () => { if (fileInput.files.length) handleFiles(fileInput.files); });
+
+        function handleFiles(files) {
+            const progressContainer = uploader.querySelector('.upload-progress');
+            progressContainer.innerHTML = ''; // Clear previous uploads
+            [...files].forEach(file => {
+                const progressItem = document.createElement('div');
+                progressItem.className = 'progress-item';
+                progressItem.innerHTML = `
+                    <span class="filename">${file.name}</span>
+                    <div class="progress-bar-container"><div class="progress-bar"></div></div>
+                    <span class="progress-status"><span class="percent">0%</span></span>`;
+                progressContainer.appendChild(progressItem);
+                
+                const progressBar = progressItem.querySelector('.progress-bar');
+                const percentText = progressItem.querySelector('.percent');
+                let width = 0;
+                const interval = setInterval(() => {
+                    width += 10;
+                    progressBar.style.width = width + '%';
+                    percentText.textContent = width + '%';
+                    if (width >= 100) {
+                        clearInterval(interval);
+                         percentText.innerHTML = '<i class="ri-checkbox-circle-fill icon-success"></i>';
+                    }
+                }, 200);
+            });
+        }
+        
+        // --- Modal Tabs Logic (unchanged) ---
+        const tabsContainer = document.querySelector('.collaboration-center');
+        tabsContainer.addEventListener('click', (e) => {
+            if (e.target.matches('.tab-btn')) {
+                const tab = e.target.dataset.tab;
+                tabsContainer.querySelector('.tab-btn.active').classList.remove('active');
+                tabsContainer.querySelector('.tab-content.active').classList.remove('active');
+                e.target.classList.add('active');
+                document.getElementById(tab).classList.add('active');
+            }
+        });
+
+        // --- Refactored List View Logic ---
+        let allDeliverables = [];
+        let currentSort = { key: 'phaseKey', order: 'asc' };
+
+        // Data Dictionaries
+        const timeframeMap = { "上市前36个月": 1, "上市前24个月至12个月": 2, "上市前6个月": 3, "上市后6个月": 4 };
+        const phaseMap = { "Business Plan - PLT validation": 1, "Registration": 2, "Market Plan - Launch Plan": 3, "Launch Plan - Go": 4 };
+
+        function parseKanbanData() {
+            const deliverables = [];
+            const timeframes = Array.from(document.querySelectorAll('.kanban-header-row .kanban-header-cell:not(.empty)')).map(h => h.textContent.trim());
+            const workstreamSet = new Set();
+            const phaseSet = new Set();
+
+            document.querySelectorAll('.kanban-row').forEach((row, rowIndex) => {
+                const workstream = row.querySelector('.workstream-header').textContent.trim();
+                workstreamSet.add(workstream);
+                
+                row.querySelectorAll('.kanban-cell').forEach((cell, cellIndex) => {
+                const timeframe = timeframes[cellIndex];
+                    cell.querySelectorAll('.card').forEach(card => {
+                    const phase = card.dataset.phase;
+                        phaseSet.add(phase);
+                        const isNecessary = card.querySelector('.necessary') !== null;
+                        
+                        deliverables.push({
+                            id: `deliv-${rowIndex}-${cellIndex}-${deliverables.length}`,
+                            name: card.querySelector('.card-title').textContent.trim(),
+                            workstream: workstream,
+                            timeframe: timeframe,
+                            timeframeKey: timeframeMap[timeframe] || 99,
+                            phase: phase,
+                            phaseKey: phaseMap[phase] || 99,
+                            necessity: isNecessary ? 'Necessary' : 'Optional',
+                            hasTemplate: card.querySelector('.template-link') !== null,
+                            templateUrl: card.querySelector('.template-link')?.href,
+                            associatedTasksLink: '#' // Placeholder
+                        });
+                    });
+                });
+            });
+            
+            populateFilters(Array.from(workstreamSet), timeframes, Array.from(phaseSet));
+            return deliverables;
+        }
+
+        function populateFilters(workstreams, timeframes, phases) {
+            const timeframeFilter = document.getElementById('timeframeFilter');
+            timeframes.forEach(t => timeframeFilter.appendChild(new Option(t, t)));
+            
+            const workstreamFilter = document.getElementById('workstreamFilter');
+            workstreams.forEach(w => workstreamFilter.appendChild(new Option(w, w)));
+
+            const phaseFilter = document.getElementById('phaseFilter');
+            phases.forEach(p => phaseFilter.appendChild(new Option(p, p)));
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('deliverablesTbody');
+            const emptyState = document.getElementById('emptyState');
+            tbody.innerHTML = '';
+
+            if (data.length === 0) {
+                emptyState.classList.add('visible');
+                tbody.style.display = 'none';
+                return;
+            }
+            
+            emptyState.classList.remove('visible');
+            tbody.style.display = '';
+
+            data.forEach(d => {
+                const tr = document.createElement('tr');
+                tr.dataset.id = d.id;
+                    tr.innerHTML = `
+                    <td class="col-deliverable">${d.name}</td>
+                    <td class="col-workstream">${d.workstream}</td>
+                    <td class="col-timeframe">${d.timeframe}</td>
+                    <td class="col-phase"><span class="phase-pill" data-phase-key="${d.phaseKey}">${d.phase}</span></td>
+                    <td class="col-necessity">
+                        <span class="status-indicator">
+                            <i class="ri-checkbox-blank-circle-fill" style="color: ${d.necessity === 'Necessary' ? 'var(--status-necessary)' : 'var(--status-optional)'};"></i>
+                            ${d.necessity === 'Necessary' ? '必要' : '可选'}
+                        </span>
+                    </td>
+                    <td class="col-template">
+                        ${d.hasTemplate ? `<a href="${d.templateUrl || '#'}" download title="下载模板"><i class="ri-download-2-line"></i></a>` : ''}
+                    </td>
+                    <td class="col-tasks"><a href="${d.associatedTasksLink}">查看任务</a></td>
+                    <td class="col-actions">
+                        <div class="kebab-menu">
+                            <button class="action-btn kebab-toggle" title="更多操作"><i class="ri-more-fill"></i></button>
+                            <div class="kebab-dropdown">
+                                <button class="kebab-dropdown-item view-details"><i class="ri-eye-line"></i> 查看详情</button>
+                                <button class="kebab-dropdown-item upload-attachment"><i class="ri-upload-2-line"></i> 上传附件</button>
+                            </div>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        
+        function showSkeletonLoader() {
+            const skeletonLoader = document.getElementById('skeletonLoader');
+            const deliverablesTable = document.getElementById('deliverablesTable');
+            skeletonLoader.innerHTML = '';
+            for (let i = 0; i < 10; i++) {
+                skeletonLoader.innerHTML += `
+                    <div class="skeleton-row">
+                        <div class="skeleton-item sk-text-long"></div>
+                        <div class="skeleton-item sk-text-medium"></div>
+                        <div class="skeleton-item sk-text-short"></div>
+                        <div class="skeleton-item sk-pill"></div>
+                        <div class="skeleton-item sk-text-short"></div>
+                        <div class="skeleton-item sk-icon"></div>
+                        <div class="skeleton-item sk-text-short"></div>
+                        <div class="skeleton-item sk-icon"></div>
+                    </div>
+                `;
+            }
+            skeletonLoader.classList.add('visible');
+            deliverablesTable.style.display = 'none';
+        }
+
+        function hideSkeletonLoader() {
+            document.getElementById('skeletonLoader').classList.remove('visible');
+            document.getElementById('deliverablesTable').style.display = 'table';
+        }
+
+        function applyFiltersAndSort() {
+            let filteredData = [...allDeliverables];
+            
+            const filters = {
+                timeframe: document.getElementById('timeframeFilter').value,
+                workstream: document.getElementById('workstreamFilter').value,
+                phase: document.getElementById('phaseFilter').value,
+                necessity: document.getElementById('necessityFilter').value
+            };
+
+            filteredData = filteredData.filter(d => {
+                return (filters.timeframe === 'all' || d.timeframe === filters.timeframe) &&
+                       (filters.workstream === 'all' || d.workstream === filters.workstream) &&
+                       (filters.phase === 'all' || d.phase === filters.phase) &&
+                       (filters.necessity === 'all' || d.necessity === filters.necessity);
+            });
+            
+            // Sorting
+            filteredData.sort((a, b) => {
+                const valA = a[currentSort.key];
+                const valB = b[currentSort.key];
+                let comparison = 0;
+                if (valA > valB) comparison = 1;
+                else if (valA < valB) comparison = -1;
+                return currentSort.order === 'asc' ? comparison : -comparison;
+            });
+            
+            renderTable(filteredData);
+
+        }
+
+        function updateSortIcons() {
+            // Reset all icons
+            document.querySelectorAll('#deliverablesTable th .sort-icon').forEach(icon => {
+                icon.classList.remove('active', 'desc');
+                icon.className = 'ri-arrow-up-down-line sort-icon';
+            });
+
+            // Activate current sort icon
+            const th = document.querySelector(`#deliverablesTable th[data-sort="${currentSort.key}"]`);
+            if (th) {
+                const currentIcon = th.querySelector('.sort-icon');
+                currentIcon.classList.add('active');
+                currentIcon.className = currentSort.order === 'asc' ? 'ri-sort-asc sort-icon active' : 'ri-sort-desc sort-icon active';
+            }
+        }
+
+        function initializeListView() {
+            showSkeletonLoader();
+            setTimeout(() => { // Simulate network delay
+                allDeliverables = parseKanbanData();
+                applyFiltersAndSort();
+                updateSortIcons();
+                hideSkeletonLoader();
+                setupEventListeners();
+            }, 500);
+        }
+        
+        function populateAndOpenModalFromRow(id) {
+            const data = allDeliverables.find(d => d.id === id);
+            if (!data) return;
+
+            document.getElementById('modalTitle').textContent = data.name;
+            document.getElementById('modalWorkstream').textContent = data.workstream;
+            document.getElementById('modalTimeframe').textContent = data.timeframe;
+            document.getElementById('modalNecessity').textContent = data.necessity === 'Necessary' ? '必要交付物' : '非必要';
+            
+            const phasePill = document.getElementById('modalPhase');
+            phasePill.textContent = data.phase;
+            const phaseColor = getComputedStyle(document.documentElement).getPropertyValue(`--pill-${data.phase.toLowerCase().replace(/ /g, '-').replace(/---/g, '-')}-bg`);
+            phasePill.style.backgroundColor = phaseColor || '#E5E7EB';
+
+            openModal();
+        }
+
+        function setupEventListeners() {
+            // Filters
+            document.querySelectorAll('.filter-select').forEach(sel => sel.addEventListener('change', applyFiltersAndSort));
+            
+            const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+            const clearFiltersBtnEmpty = document.getElementById('clearFiltersBtnEmpty');
+            const clearLogic = () => {
+                document.getElementById('timeframeFilter').value = 'all';
+                document.getElementById('workstreamFilter').value = 'all';
+                document.getElementById('phaseFilter').value = 'all';
+                document.getElementById('necessityFilter').value = 'all';
+                applyFiltersAndSort();
+            }
+            clearFiltersBtn.addEventListener('click', clearLogic);
+            clearFiltersBtnEmpty.addEventListener('click', clearLogic);
+            
+            // Sorting
+            document.querySelectorAll('#deliverablesTable th[data-sort]').forEach(th => {
+                th.addEventListener('click', () => {
+                    const sortKey = th.dataset.sort;
+                    if (currentSort.key === sortKey) {
+                        currentSort.order = currentSort.order === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        currentSort.key = sortKey;
+                        currentSort.order = 'asc';
+                    }
+                    
+                    updateSortIcons();
+                    applyFiltersAndSort();
+                });
+            });
+
+            // Table Clicks (Row, Actions, Checkbox)
+            const tbody = document.getElementById('deliverablesTbody');
+            tbody.addEventListener('click', (e) => {
+                const target = e.target;
+                const row = target.closest('tr');
+                if (!row) return;
+
+                // Kebab Menu Toggle
+                if (target.closest('.kebab-toggle')) {
+                    const dropdown = row.querySelector('.kebab-dropdown');
+                    dropdown.classList.toggle('show');
+                    // Close other menus
+                    document.querySelectorAll('.kebab-dropdown.show').forEach(d => {
+                        if (d !== dropdown) d.classList.remove('show');
+                    });
+                    e.stopPropagation(); // prevent row click
+                    return; 
+                }
+
+                // Kebab Menu Actions
+                if (target.closest('.view-details')) {
+                    populateAndOpenModalFromRow(row.dataset.id);
+                    return;
+                }
+                 if (target.closest('.upload-attachment')) {
+                    populateAndOpenModalFromRow(row.dataset.id); // Open modal and user can then upload
+                    return;
+                }
+                
+                // Prevent row click when clicking on links or buttons inside
+                if (target.closest('a, button')) {
+                    return;
+                }
+
+                // Default row click
+                populateAndOpenModalFromRow(row.dataset.id);
+            });
+
+            // Select All Checkbox
+            document.getElementById('selectAllCheckbox').addEventListener('change', (e) => {
+                const isChecked = e.target.checked;
+                tbody.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.checked = isChecked;
+                    checkbox.closest('tr').classList.toggle('selected', isChecked);
+                });
+
+            });
+        }
+        
+
+        
+        // Close kebab menus when clicking outside
+        document.addEventListener('click', (e) => {
+             if (!e.target.closest('.kebab-menu')) {
+                 document.querySelectorAll('.kebab-dropdown.show').forEach(d => d.classList.remove('show'));
+             }
+        });
+
+        // Add unified click handler to original Kanban cards
+        deliverableCards.forEach(card => {
+            card.addEventListener('click', (e) => {
+                if (e.target.closest('.template-link')) return;
+
+                const workstream = card.closest('.kanban-row').querySelector('.workstream-header').textContent;
+                const cellIndex = Array.from(card.closest('.kanban-row').querySelectorAll('.kanban-cell')).indexOf(card.parentElement);
+                const timeframes = Array.from(document.querySelectorAll('.kanban-header-row .kanban-header-cell:not(.empty)')).map(h => h.textContent);
+                const timeframe = timeframes[cellIndex];
+                const title = card.querySelector('.card-title').textContent;
+                const phase = card.dataset.phase;
+                const isNecessary = card.querySelector('.necessary') !== null;
+                const necessityText = isNecessary ? '必要交付物' : '非必要';
+                
+                // Use the same modal population logic
+                document.getElementById('modalTitle').textContent = title;
+                document.getElementById('modalWorkstream').textContent = workstream;
+                document.getElementById('modalTimeframe').textContent = timeframe;
+                document.getElementById('modalNecessity').textContent = necessityText;
+                const phasePill = document.getElementById('modalPhase');
+                phasePill.textContent = phase;
+                const phaseColor = getComputedStyle(document.documentElement).getPropertyValue(`--pill-${phase.toLowerCase().replace(/ /g, '-').replace(/---/g, '-')}-bg`);
+                phasePill.style.backgroundColor = phaseColor || '#E5E7EB';
+
+                openModal();
+            });
+        });
+    });
+    </script>
+</body>
+</html>

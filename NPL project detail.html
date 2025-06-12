@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>医疗器械新产品准入任务管理系统</title>
+    <link rel="stylesheet" href="styles/NPL project detail.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.css">
+    <script src="https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.js"></script>
+    <style>
+        /* Tooltip样式 */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: auto;
+            min-width: 200px;
+            max-width: 400px;
+            background-color: #333;
+            color: #fff;
+            text-align: left;
+            border-radius: 6px;
+            padding: 8px 12px;
+            position: absolute;
+            z-index: 1000;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 12px;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        
+        .tooltip .tooltiptext::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #333 transparent transparent transparent;
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        /* 甘特图任务名称样式 */
+        .gantt-task-cell {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        /* 任务名称超长时显示省略号 */
+        .task-name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 200px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <header class="top-nav">
+        <div class="logo">
+            <img loading="lazy" src="resources/BS-logo-cn.png" alt="Boston Scientific Logo" style="width: auto; height: 33px;">
+            <!--<i class="ri-heart-pulse-line"></i>-->
+            <h1>WATCHMAN FLX Pro 新产品准入项目</h1>
+        </div>
+        
+        <nav>
+            <ul>
+                <li class="active"><a href="#"><i class="ri-dashboard-line"></i> 进度看板</a></li>
+                <li><a href="NPL project deliverables.html"><i class="ri-file-list-3-line"></i> 文档库</a></li>
+                <li><a href="#"><i class="ri-history-line"></i> 审计日志</a></li>
+                <li><a href="#"><i class="ri-settings-line"></i> 设置</a></li>
+            </ul>
+        </nav>
+        <div class="user-info">
+            <div class="notifications">
+                <i class="ri-notification-3-line"></i>
+                <span class="badge">3</span>
+            </div>
+            <div class="avatar">
+                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="用户头像">
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- 左侧侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h3>阶段任务</h3>
+                <button class="collapse-btn" id="sidebarToggle">
+                    <i class="ri-menu-fold-line"></i>
+                </button>
+            </div>
+            <div class="task-tree">
+                <ul>
+                    <li class="task-group active">
+                        <div class="task-group-header">
+                            <i class="ri-time-line"></i>
+                            <span class="tooltip task-name">1. Business Plan - PLT validation
+                                <span class="tooltiptext">1. Business Plan - PLT validation</span>
+                            </span>
+                            <span class="progress">75%</span>
+                            <i class="ri-arrow-down-s-line expand-icon"></i>
+                        </div>
+                        <ul class="subtasks">
+                            <li class="completed"><i class="ri-checkbox-circle-fill"></i> <span class="tooltip task-name">1.1 Registration Strategy<span class="tooltiptext">1.1 Registration Strategy</span></span></li>
+                            <li class="completed"><i class="ri-checkbox-circle-fill"></i> <span class="tooltip task-name">1.2 New Product Marketing Report<span class="tooltiptext">1.2 New Product Marketing Report</span></span></li>
+                            <li class="completed"><i class="ri-checkbox-circle-fill"></i> <span class="tooltip task-name">1.3 Business Case Preparation<span class="tooltiptext">1.3 Business Case Preparation</span></span></li>
+                            <li class="in-progress"><i class="ri-time-line"></i> <span class="tooltip task-name">1.4 Business Case Ready<span class="tooltiptext">1.4 Business Case Ready</span></span></li>
+                            <li><i class="ri-checkbox-blank-circle-line"></i> <span class="tooltip task-name">1.5 Business Case Review in PLT<span class="tooltiptext">1.5 Business Case Review in PLT</span></span></li>
+                            <li><i class="ri-checkbox-blank-circle-line"></i> <span class="tooltip task-name">1.6 Business Case Approval<span class="tooltiptext">1.6 Business Case Approval</span></span></li>
+                        </ul>
+                    </li>
+                    <li class="task-group">
+                        <div class="task-group-header">
+                            <i class="ri-checkbox-blank-circle-line"></i>
+                            <span class="tooltip task-name">2. Registration
+                                <span class="tooltiptext">2. Registration</span>
+                            </span>
+                            <span class="progress">0%</span>
+                            <i class="ri-arrow-down-s-line expand-icon"></i>
+                        </div>
+                        <ul class="subtasks hidden">
+                            <li><i class="ri-checkbox-blank-circle-line"></i> <span class="tooltip task-name">2.1 Registration Kickoff<span class="tooltiptext">2.1 Registration Kickoff</span></span></li>
+                            <li><i class="ri-checkbox-blank-circle-line"></i> <span class="tooltip task-name">2.2 Registration RPMS & EMARS<span class="tooltiptext">2.2 Registration RPMS & EMARS</span></span></li>
+                            <li><i class="ri-checkbox-blank-circle-line"></i> <span class="tooltip task-name">2.3 License Release<span class="tooltiptext">2.3 License Release</span></span></li>
+                        </ul>
+                    </li>
+                    <li class="task-group">
+                        <div class="task-group-header">
+                            <i class="ri-checkbox-blank-circle-line"></i>
+                            <span class="tooltip task-name">3. Market Plan - Launch Plan
+                                <span class="tooltiptext">3. Market Plan - Launch Plan</span>
+                            </span>
+                            <span class="progress">0%</span>
+                            <i class="ri-arrow-down-s-line expand-icon"></i>
+                        </div>
+                        <ul class="subtasks hidden">
+                            <li><i class="ri-checkbox-blank-circle-line"></i> <span class="tooltip task-name">3.1 Initiate Marketing Plan<span class="tooltiptext">3.1 Initiate Marketing Plan</span></span></li>
+                            <li><i class="ri-checkbox-blank-circle-line"></i> <span class="tooltip task-name">3.2 Selling Price Proposal<span class="tooltiptext">3.2 Selling Price Proposal</span></span></li>
+                            <li><i class="ri-checkbox-blank-circle-line"></i> <span class="tooltip task-name">3.3 Sales Incentive Approval<span class="tooltiptext">3.3 Sales Incentive Approval</span></span></li>
+                            <li><i class="ri-checkbox-blank-circle-line"></i> <span class="tooltip task-name">3.4 Commercial Policy Approval<span class="tooltiptext">3.4 Commercial Policy Approval</span></span></li>
+                            <li><i class="ri-checkbox-blank-circle-line"></i> <span class="tooltip task-name">3.5 Selling Price Approval<span class="tooltiptext">3.5 Selling Price Approval</span></span></li>
+                            <li><i class="ri-checkbox-blank-circle-line"></i> <span class="tooltip task-name">3.6 Marketing Plan Review<span class="tooltiptext">3.6 Marketing Plan Review</span></span></li>
+                            <li><i class="ri-checkbox-blank-circle-line"></i> <span class="tooltip task-name">3.7 Marketing Plan Approval<span class="tooltiptext">3.7 Marketing Plan Approval</span></span></li>
+                            <li><i class="ri-checkbox-blank-circle-line"></i> <span class="tooltip task-name">3.8 Final Launch Plan Approval<span class="tooltiptext">3.8 Final Launch Plan Approval</span></span></li>
+                            <li><i class="ri-checkbox-blank-circle-line"></i> <span class="tooltip task-name">3.9 Marketing Plan Execution<span class="tooltiptext">3.9 Marketing Plan Execution</span></span></li>
+                            <li><i class="ri-checkbox-blank-circle-line"></i> <span class="tooltip task-name">3.10 Demand Forecast<span class="tooltiptext">3.10 Demand Forecast</span></span></li>
+                        </ul>
+                    </li>
+                    <li class="task-group">
+                        <div class="task-group-header">
+                            <i class="ri-checkbox-blank-circle-line"></i>
+                            <span class="tooltip task-name">4. Launch Plan - Go
+                                <span class="tooltiptext">4. Launch Plan - Go</span>
+                            </span>
+                            <span class="progress">0%</span>
+                            <i class="ri-arrow-down-s-line expand-icon"></i>
+                        </div>
+                        <ul class="subtasks hidden">
+                            <li><i class="ri-checkbox-blank-circle-line"></i> <span class="tooltip task-name">4.1 Operation & System Preparation<span class="tooltiptext">4.1 Operation & System Preparation</span></span></li>
+                            <li><i class="ri-checkbox-blank-circle-line"></i> <span class="tooltip task-name">4.2 Importation Preparation<span class="tooltiptext">4.2 Importation Preparation</span></span></li>
+                            <li><i class="ri-checkbox-blank-circle-line"></i> <span class="tooltip task-name">4.3 Localization Preparation<span class="tooltiptext">4.3 Localization Preparation</span></span></li>
+                            <li><i class="ri-checkbox-blank-circle-line"></i> <span class="tooltip task-name">4.4 Material Master Data Setup<span class="tooltiptext">4.4 Material Master Data Setup</span></span></li>
+                            <li><i class="ri-checkbox-blank-circle-line"></i> <span class="tooltip task-name">4.5 Selling Price Setup<span class="tooltiptext">4.5 Selling Price Setup</span></span></li>
+                            <li><i class="ri-checkbox-blank-circle-line"></i> <span class="tooltip task-name">4.6 Channel Distribution Preparation<span class="tooltiptext">4.6 Channel Distribution Preparation</span></span></li>
+                            <li><i class="ri-checkbox-blank-circle-line"></i> <span class="tooltip task-name">4.7 Start to Manufacture & Import<span class="tooltiptext">4.7 Start to Manufacture & Import</span></span></li>
+                            <li><i class="ri-checkbox-blank-circle-line"></i> <span class="tooltip task-name">4.8 Localization & Distribute to Dealers<span class="tooltiptext">4.8 Localization & Distribute to Dealers</span></span></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="content">
+            <div class="page-header">
+                <h2>进度看板</h2>
+                <div class="controls">
+                    <button class="btn btn-outline"><i class="ri-filter-line"></i> 筛选</button>
+                    <div class="search-box">
+                        <i class="ri-search-line"></i>
+                        <input type="text" placeholder="搜索任务、文档...">
+                    </div>
+                    <button class="btn btn-primary"><i class="ri-add-line"></i> 新建任务</button>
+                </div>
+            </div>
+
+            <!-- 甘特图区域 -->
+            <div class="gantt-container">
+                <!--<h3>项目进度甘特图 </h3>-->
+                
+                <div class="gantt-controls">
+                    <div class="view-controls">
+                        <button class="btn btn-sm btn-outline active"><i class="ri-calendar-line"></i> 时间轴视图</button>
+                        <button class="btn btn-sm btn-outline"><i class="ri-list-check-2"></i> 列表视图</button>
+                    </div>
+                    <div class="scale-controls">
+                        <button class="btn btn-sm btn-outline active" id="scale-quarters">季度</button>
+                        <button class="btn btn-sm btn-outline" id="scale-months">月度</button>
+                        <button class="btn btn-sm btn-outline" id="scale-weeks">周度</button>
+                    </div>
+                </div>
+                
+                <!-- DHTMLX Gantt容器 -->
+                <div id="gantt_here" style="width:100%; height:500px;"></div>
+            </div>
+
+            <!-- 当前阶段详情 -->
+            <div class="stage-details">
+                <div class="card stage-info">
+                    <div class="card-header">
+                        <h3>
+                            <i class="ri-time-line"></i>
+                            当前阶段: 1. Business Plan - PLT validation
+                        </h3>
+                        <div class="stage-status">
+                            <span class="status warning">进行中</span>
+                            <div class="progress-circle" data-progress="75">
+                                <svg width="60" height="60">
+                                    <circle class="progress-circle-bg" cx="30" cy="30" r="24"></circle>
+                                    <circle class="progress-circle-fill" cx="30" cy="30" r="24" style="stroke-dasharray: 150.8, 150.8; stroke-dashoffset: 37.7;"></circle>
+                                    <text x="30" y="30" dominant-baseline="middle" text-anchor="middle">75%</text>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="stage-details-info">
+                            <div class="info-item">
+                                <label>开始日期:</label>
+                                <span>2023-01-01</span>
+                            </div>
+                            <div class="info-item">
+                                <label>计划结束:</label>
+                                <span>2023-08-31</span>
+                            </div>
+                            <div class="info-item">
+                                <label>负责人:</label>
+                                <span class="user">
+                                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="刘军">
+                                    刘军 (产品经理)
+                                </span>
+                            </div>
+                            <div class="info-item">
+                                <label>风险状态:</label>
+                                <span class="success"><i class="ri-checkbox-circle-fill"></i> 正常进行</span>
+                            </div>
+                        </div>
+                        <div class="stage-description">
+                            <p>商业计划PLT验证阶段负责制定注册策略、产品营销报告、准备商业计划书，并通过PLT评审获得批准，为后续注册阶段奠定基础。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card tasks-list">
+                    <div class="card-header">
+                        <h3>阶段任务列表</h3>
+                        <button class="btn btn-sm btn-outline"><i class="ri-add-line"></i> 添加任务</button>
+                    </div>
+                    <div class="card-body">
+                        <ul class="tasks">
+                            <li class="task-item completed">
+                                <div class="task-checkbox">
+                                    <input type="checkbox" id="task1" checked>
+                                    <label for="task1"><i class="ri-checkbox-circle-fill"></i></label>
+                                </div>
+                                <div class="task-content">
+                                    <h4>1.1 Registration Strategy</h4>
+                                    <p>制定产品注册策略</p>
+                                    <div class="task-meta">
+                                        <span class="task-date">完成于: 2023-03-15</span>
+                                        <span class="task-assignee">
+                                            <img src="https://randomuser.me/api/portraits/men/45.jpg" alt="李强">
+                                            李强
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="task-actions">
+                                    <button class="btn-icon"><i class="ri-more-2-fill"></i></button>
+                                </div>
+                            </li>
+                            <li class="task-item completed">
+                                <div class="task-checkbox">
+                                    <input type="checkbox" id="task2" checked>
+                                    <label for="task2"><i class="ri-checkbox-circle-fill"></i></label>
+                                </div>
+                                <div class="task-content">
+                                    <h4>1.2 New Product Marketing Report</h4>
+                                    <p>新产品市场营销报告</p>
+                                    <div class="task-meta">
+                                        <span class="task-date">完成于: 2023-03-31</span>
+                                        <span class="task-assignee">
+                                            <img src="https://randomuser.me/api/portraits/women/22.jpg" alt="周梅">
+                                            周梅
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="task-actions">
+                                    <button class="btn-icon"><i class="ri-more-2-fill"></i></button>
+                                </div>
+                            </li>
+                            <li class="task-item completed">
+                                <div class="task-checkbox">
+                                    <input type="checkbox" id="task3" checked>
+                                    <label for="task3"><i class="ri-checkbox-circle-fill"></i></label>
+                                </div>
+                                <div class="task-content">
+                                    <h4>1.3 Business Case Preparation</h4>
+                                    <p>商业计划书准备</p>
+                                    <div class="task-meta">
+                                        <span class="task-date">完成于: 2023-06-20</span>
+                                        <span class="task-assignee">
+                                            <img src="https://randomuser.me/api/portraits/women/67.jpg" alt="杨红">
+                                            杨红
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="task-actions">
+                                    <button class="btn-icon"><i class="ri-more-2-fill"></i></button>
+                                </div>
+                            </li>
+                            <li class="task-item active warning">
+                                <div class="task-checkbox">
+                                    <input type="checkbox" id="task4">
+                                    <label for="task4"><i class="ri-time-line"></i></label>
+                                </div>
+                                <div class="task-content">
+                                    <div class="task-header">
+                                        <h4>1.4 Business Case Ready</h4>
+                                        <span class="milestone-badge" title="里程碑任务"><i class="ri-flag-2-fill"></i></span>
+                                    </div>
+                                    <p>商业计划书就绪</p>
+                                    
+                                    <div class="task-dates">
+                                        <div class="date-item">
+                                            <label>计划开始：</label>
+                                            <span>2023-07-01</span>
+                                        </div>
+                                        <div class="date-item">
+                                            <label>计划完成：</label>
+                                            <span>2023-07-15</span>
+                                        </div>
+                                        <div class="date-item">
+                                            <label>实际开始：</label>
+                                            <span>2023-07-01</span>
+                                        </div>
+                                        <div class="date-item">
+                                            <label>预计完成：</label>
+                                            <span>2023-07-15</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="task-meta">
+                                        <span class="task-assignee">
+                                            <label>负责人：</label>
+                                            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="刘军">
+                                            刘军
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="document-list">
+                                        <span class="document">
+                                            <i class="ri-file-word-line"></i> 
+                                            商业计划书最终版.docx
+                                            <span class="doc-badge review">审核中</span>
+                                        </span>
+                                        <span class="document">
+                                            <i class="ri-file-excel-line"></i> 
+                                            财务分析报告.xlsx
+                                            <span class="doc-badge final">最终版</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="task-actions">
+                                    <button class="btn-icon" id="viewTask"><i class="ri-eye-line"></i></button>
+                                    <button class="btn-icon"><i class="ri-more-2-fill"></i></button>
+                                </div>
+                            </li>
+                            <li class="task-item pending">
+                                <div class="task-checkbox">
+                                    <input type="checkbox" id="task5">
+                                    <label for="task5"><i class="ri-checkbox-blank-circle-line"></i></label>
+                                </div>
+                                <div class="task-content">
+                                    <h4>1.5 Business Case Review in PLT</h4>
+                                    <p>PLT团队审核商业计划书</p>
+                                    <div class="task-meta">
+                                        <span class="task-date">计划开始: 2023-07-16</span>
+                                        <span class="task-assignee">
+                                            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="刘军">
+                                            刘军
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="task-actions">
+                                    <button class="btn-icon"><i class="ri-more-2-fill"></i></button>
+                                </div>
+                            </li>
+                            <li class="task-item pending">
+                                <div class="task-checkbox">
+                                    <input type="checkbox" id="task6">
+                                    <label for="task6"><i class="ri-checkbox-blank-circle-line"></i></label>
+                                </div>
+                                <div class="task-content">
+                                    <h4>1.6 Business Case Approval</h4>
+                                    <p>商业计划书正式批准</p>
+                                    <div class="task-meta">
+                                        <span class="task-date">计划完成: 2023-08-31</span>
+                                        <span class="task-assignee">
+                                            <img src="https://randomuser.me/api/portraits/men/55.jpg" alt="王总">
+                                            王总
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="task-actions">
+                                    <button class="btn-icon"><i class="ri-more-2-fill"></i></button>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 任务详情抽屉（默认隐藏） -->
+            <div class="task-drawer" id="taskDrawer">
+                <div class="drawer-header">
+                    <h3>任务详情</h3>
+                    <button class="btn-icon close-drawer" id="closeDrawer"><i class="ri-close-line"></i></button>
+                </div>
+                <div class="drawer-body">
+                    <div class="task-summary">
+                        <h2>1.4 Business Case Ready</h2>
+                        <div class="task-status warning">
+                            <i class="ri-time-line"></i>
+                            <span>进行中</span>
+                        </div>
+                    </div>
+                    
+                    <div class="task-priority warning">
+                        <i class="ri-flag-2-fill"></i>
+                        <span>优先级: 高</span>
+                    </div>
+                    
+                    <div class="task-detail-section">
+                        <h4>任务基本信息</h4>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <label>任务ID:</label>
+                                <span>1.4</span>
+                            </div>
+                            <div class="detail-item">
+                                <label>里程碑:</label>
+                                <span class="milestone-indicator">是</span>
+                            </div>
+                            <div class="detail-item">
+                                <label>负责人:</label>
+                                <span class="user">
+                                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="刘军">
+                                    刘军 (产品经理)
+                                </span>
+                            </div>
+                            <div class="detail-item">
+                                <label>状态:</label>
+                                <span class="status-indicator warning">进行中</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="task-detail-section">
+                        <h4>日期信息</h4>
+                        <div class="timeline-detail">
+                            <div class="detail-item">
+                                <label>计划开始日期:</label>
+                                <span>2023-07-01</span>
+                            </div>
+                            <div class="detail-item">
+                                <label>计划完成日期:</label>
+                                <span>2023-07-15</span>
+                            </div>
+                            <div class="detail-item">
+                                <label>实际开始日期:</label>
+                                <span>2023-07-01</span>
+                            </div>
+                            <div class="detail-item">
+                                <label>预计完成日期:</label>
+                                <span>2023-07-15</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="task-detail-section">
+                        <h4>相关文档</h4>
+                        <div class="documents">
+                            <div class="document-card">
+                                <div class="doc-icon"><i class="ri-file-word-line"></i></div>
+                                <div class="doc-info">
+                                    <h5>商业计划书最终版.docx</h5>
+                                    <span>上传于: 2023-07-10</span>
+                                    <div class="version-tag review">审核中</div>
+                                </div>
+                                <div class="doc-actions">
+                                    <button class="btn-icon"><i class="ri-download-line"></i></button>
+                                    <button class="btn-icon"><i class="ri-eye-line"></i></button>
+                                </div>
+                            </div>
+                            <div class="document-card">
+                                <div class="doc-icon"><i class="ri-file-excel-line"></i></div>
+                                <div class="doc-info">
+                                    <h5>财务分析报告.xlsx</h5>
+                                    <span>上传于: 2023-07-08</span>
+                                    <div class="version-tag final">最终版</div>
+                                </div>
+                                <div class="doc-actions">
+                                    <button class="btn-icon"><i class="ri-download-line"></i></button>
+                                    <button class="btn-icon"><i class="ri-eye-line"></i></button>
+                                </div>
+                            </div>
+                            <div class="document-card">
+                                <div class="doc-icon"><i class="ri-file-pdf-line"></i></div>
+                                <div class="doc-info">
+                                    <h5>市场分析报告.pdf</h5>
+                                    <span>上传于: 2023-07-05</span>
+                                    <div class="version-tag review">审核中</div>
+                                </div>
+                                <div class="doc-actions">
+                                    <button class="btn-icon"><i class="ri-download-line"></i></button>
+                                    <button class="btn-icon"><i class="ri-eye-line"></i></button>
+                                </div>
+                            </div>
+                            
+                            <button class="btn btn-outline btn-block">
+                                <i class="ri-upload-2-line"></i> 上传新文档
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="task-detail-section">
+                        <h4>任务依赖关系</h4>
+                        <div class="dependency-container">
+                            <div class="dependency-list">
+                                <div class="dependency-item">
+                                    <div class="dependency-header">前置任务:</div>
+                                    <div class="dependency-task completed">
+                                        <i class="ri-checkbox-circle-fill"></i>
+                                        <span>1.3 Business Case Preparation</span>
+                                    </div>
+                                </div>
+                                <div class="dependency-item">
+                                    <div class="dependency-header">后续任务:</div>
+                                    <div class="dependency-task pending">
+                                        <i class="ri-checkbox-blank-circle-line"></i>
+                                        <span>1.5 Business Case Review in PLT</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="task-detail-section">
+                        <h4>讨论记录</h4>
+                        <div class="discussion">
+                            <div class="comment">
+                                <div class="comment-avatar">
+                                    <img src="https://randomuser.me/api/portraits/women/67.jpg" alt="杨红">
+                                </div>
+                                <div class="comment-content">
+                                    <div class="comment-header">
+                                        <h5>杨红 (财务主管)</h5>
+                                        <span>2023-07-12 14:23</span>
+                                    </div>
+                                    <div class="comment-body">
+                                        <p>财务分析已更新，ROI计算有误，已在新版中修正。请各位审核。</p>
+                                    </div>
+                                    <div class="comment-attachments">
+                                        <span class="attachment"><i class="ri-file-excel-line"></i> 财务分析v2.xlsx</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="comment">
+                                <div class="comment-avatar">
+                                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="刘军">
+                                </div>
+                                <div class="comment-content">
+                                    <div class="comment-header">
+                                        <h5>刘军 (产品经理)</h5>
+                                        <span>2023-07-13 09:47</span>
+                                    </div>
+                                    <div class="comment-body">
+                                        <p>@王总 PLT会议被推迟到下周四，这会导致我们整体进度延迟。需要协调一下市场部的宣传计划。</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="comment">
+                                <div class="comment-avatar">
+                                    <img src="https://randomuser.me/api/portraits/men/55.jpg" alt="王总">
+                                </div>
+                                <div class="comment-content">
+                                    <div class="comment-header">
+                                        <h5>王总 (部门总监)</h5>
+                                        <span>2023-07-13 10:15</span>
+                                    </div>
+                                    <div class="comment-body">
+                                        <p>收到，请尽快准备补充材料，我已经和市场部沟通过延期事宜。请务必确保下周四能够通过PLT评审。</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="new-comment">
+                                <div class="comment-avatar">
+                                    <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="当前用户">
+                                </div>
+                                <div class="comment-input">
+                                    <textarea placeholder="添加评论..."></textarea>
+                                    <div class="comment-actions">
+                                        <button class="btn-icon"><i class="ri-attachment-2"></i></button>
+                                        <button class="btn-icon"><i class="ri-at-line"></i></button>
+                                        <button class="btn btn-primary btn-sm">发送</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="drawer-footer">
+                    <button class="btn btn-outline"><i class="ri-time-line"></i> 设置提醒</button>
+                    <button class="btn btn-primary"><i class="ri-check-line"></i> 完成任务</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 底部状态栏 -->
+    <footer class="status-bar">
+        <div class="status-info">
+            <span>版本号: v2.5.3</span>
+            <span>最后更新: 2023-07-18 15:42</span>
+        </div>
+        <div class="status-user">
+            <span>当前用户: 张晓芳 (注册专员)</span>
+            <span class="online-status"><i class="ri-record-circle-fill"></i> 在线</span>
+        </div>
+    </footer>
+
+    <!-- 遮罩层 -->
+    <div class="overlay" id="overlay"></div>
+
+    <script src="scripts/NPL project detail.js"></script>
+</body>
+</html> 

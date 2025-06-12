@@ -1,0 +1,528 @@
+/* 设置基础变量 */
+:root {
+    --primary-color: #003c71;
+    --accent-color: #00efff;
+    --accent-color-dark: #00c7d6;
+    --accent-secondary: #bb33ff;
+    --accent-secondary-dark: #9900ff;
+    --background-color: #f5f7fa;
+    --card-color: #ffffff;
+    --text-color: #333333;
+    --text-light: #6c757d;
+    --text-dark: #212529;
+    --border-color: #e0e0e0;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --info-color: #17a2b8;
+    --completed-color: #28a745;
+    --active-color: #17a2b8;
+    --pending-color: #6c757d;
+    --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+}
+
+/* General Body and Font Styles */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+    background-color: #F5F7FA;
+    color: #1A1A1A;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Re-using styles from NPL project detail.css for consistency */
+.top-nav {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+}
+
+.top-nav .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.top-nav .logo h1 {
+    font-size: 1.2rem;
+    margin-left: 15px;
+    font-weight: 600;
+}
+
+.top-nav nav ul {
+    list-style: none;
+    display: flex;
+    margin: 0;
+    padding: 0;
+    gap: 2rem;
+}
+
+.top-nav nav ul li {
+    position: relative;
+    padding: 1rem 0;
+}
+
+.top-nav nav ul li a {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: var(--transition);
+    color: white;
+    text-decoration: none;
+}
+
+.top-nav nav ul li a i {
+    margin-right: 8px;
+    font-size: 1.2rem;
+}
+
+.top-nav nav ul li.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: var(--accent-color);
+}
+
+.top-nav nav ul li:hover a {
+    color: var(--accent-color);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.user-info .notifications {
+    position: relative;
+}
+
+.user-info .notifications i {
+    font-size: 1.3rem;
+    cursor: pointer;
+}
+
+.user-info .notifications .badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: var(--accent-secondary);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: bold;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-info .avatar img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid var(--accent-color);
+    cursor: pointer;
+}
+
+.status-bar {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 25px;
+    background-color: #333;
+    color: #eee;
+    font-size: 0.8rem;
+    border-top: 1px solid #444;
+}
+
+.status-bar .online-status {
+    color: #2ecc71;
+}
+.status-bar .online-status i {
+    margin-right: 4px;
+}
+
+/* Main Container and Content Area */
+.main-container {
+    display: flex;
+    flex-grow: 1;
+    overflow: hidden; /* Prevent main container from scrolling */
+}
+
+.content {
+    flex-grow: 1;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Hide overflow to manage scrolling inside kanban board */
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e0e5ec;
+}
+
+.page-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    white-space: nowrap;
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+}
+
+.view-switcher {
+    display: flex;
+    background-color: #e0e5ec;
+    border-radius: 8px;
+    padding: 4px;
+}
+
+.view-switcher .view-btn {
+    background-color: transparent;
+    border: none;
+    padding: 8px 16px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #555;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+}
+.view-switcher .view-btn i {
+    margin-right: 6px;
+    font-size: 0.9rem;
+}
+
+.view-switcher .view-btn.active {
+    background-color: #ffffff;
+    color: #0056b3;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Deliverables Container */
+.deliverables-container {
+    flex-grow: 1;
+    position: relative;
+    display: flex; /* Use flex to manage view switching */
+    overflow: hidden;
+}
+
+.view {
+    width: 100%;
+    height: 100%;
+    display: none; /* Hidden by default */
+    flex-direction: column;
+    animation: fadeIn 0.5s ease;
+}
+
+.view.active {
+    display: flex; /* Show active view */
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Kanban Legend */
+.kanban-legend {
+    display: flex;
+    gap: 15px;
+    margin: 0 30px;
+    flex-grow: 1;
+    justify-content: center;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    font-size: 0.7rem;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 16px;
+    background-color: #fff;
+    border: 1px solid #e0e5ec;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.legend-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+}
+.legend-item.active {
+    box-shadow: 0 0 0 2px #0056b3;
+    transform: translateY(-2px);
+}
+
+.legend-item .legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+.legend-separator {
+    width: 1px;
+    height: 20px;
+    background-color: #e0e5ec;
+    margin: 0 5px;
+}
+
+.legend-item i {
+    margin-right: 8px;
+    font-size: 1.1rem;
+}
+
+.legend-item .submitted {
+    color: #28a745;
+}
+
+.legend-item .pending {
+    color: #6c757d;
+}
+
+.legend-item .necessary {
+    color: #ffc107;
+}
+
+.legend-item .optional {
+    color: #17a2b8;
+}
+
+.content.list-view-active .kanban-legend {
+    display: none;
+}
+
+/* Kanban Board - Main structure */
+.kanban-board {
+    display: grid;
+    grid-template-columns: auto repeat(4, auto); /* Header column + 4 timeline columns */
+    grid-auto-rows: auto;
+    flex-grow: 1;
+    overflow: auto; /* Enable scrolling for the board itself */
+    background-color: #eef2f9;
+    border-radius: 12px;
+    padding: 15px;
+    gap: 8px;
+    /* Glassmorphism effect */
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Kanban Header */
+.kanban-header-row {
+    display: contents; /* Makes this a part of the parent grid */
+}
+.kanban-header-cell {
+    position: sticky;
+    top: 0;
+    background-color: rgba(238, 242, 249, 0.8);
+    backdrop-filter: blur(5px);
+    padding: 12px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.75rem;
+    color: #333;
+    border-radius: 8px;
+}
+.kanban-header-cell.empty {
+    background-color: transparent;
+}
+
+
+/* Kanban Rows and Cells */
+.kanban-row {
+    display: contents; /* Makes this a part of the parent grid */
+}
+
+.workstream-header {
+    position: sticky;
+    left: 0;
+    font-weight: 600;
+    padding: 12px;
+    background-color: rgba(238, 242, 249, 0.8);
+    backdrop-filter: blur(5px);
+    border-radius: 8px;
+    text-align: right;
+    color: #3a4a6b;
+    font-size: 0.7rem;
+    z-index: 1; /* Keep above cells */
+}
+
+.kanban-cell {
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    padding: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-content: flex-start;
+    transition: background-color 0.3s ease;
+}
+
+/* Kanban Card */
+.card {
+    background-color: #fff;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 0.65rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1);
+    opacity: 0; /* For load animation */
+    animation: cardLoad 0.5s forwards;
+    border-left: 5px solid transparent;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 0px;
+    min-width: 70px;
+    /* max-width: 200px; */
+}
+
+.card-main {
+    /* display: flex; */
+    /* justify-content: space-between; */
+    /* align-items: flex-start; */
+    /* gap: 5px; */
+    margin-bottom: 2px;
+}
+
+.card-title {
+    font-weight: 600;
+    color: #333;
+}
+
+.card-attributes {
+    display: flex;
+    gap: 5px;
+    font-size: 0.7rem; /* Match link size */
+    white-space: nowrap;
+    align-items: center;
+}
+
+.card-attributes .ri-star-fill.necessary {
+    color: #ffbf00; /* gold */
+}
+.card-attributes .ri-checkbox-circle-fill.submitted {
+    color: #28a745; /* green */
+}
+.card-attributes .ri-checkbox-blank-circle-line.pending {
+    color: #cccccc; /* grey */
+}
+
+.card-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.template-link {
+    font-size: 0.7rem;
+    color: #0056b3;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.template-link:hover {
+    color: #003d82;
+    text-decoration: underline;
+}
+
+.template-link i {
+    margin-right: 2px;
+    vertical-align: middle; /* Align icon better with text */
+}
+
+.card strong {
+    font-weight: 600;
+    color: #333;
+}
+
+/* Staggered load animation */
+.kanban-cell:nth-child(1) .card { animation-delay: 0.1s; }
+.kanban-cell:nth-child(2) .card { animation-delay: 0.2s; }
+/* Add more if needed */
+
+
+@keyframes cardLoad {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+.card:hover {
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1), 0 6px 6px rgba(0,0,0,0.15);
+    z-index: 10;
+}
+
+/* Card Phase Colors */
+.card[data-phase="Business Plan - PLT validation"] { border-left-color: #DAF2D0; background: linear-gradient(135deg, #fafff8, #ffffff); }
+.card[data-phase="Business Plan - PLT validation"]:hover { box-shadow: 0 10px 20px rgba(218, 242, 208, 0.5), 0 6px 6px rgba(218, 242, 208, 0.6); }
+
+.card[data-phase="Registration"] { border-left-color: #C0E6F5; background: linear-gradient(135deg, #f5fcff, #ffffff); }
+.card[data-phase="Registration"]:hover { box-shadow: 0 10px 20px rgba(192, 230, 245, 0.5), 0 6px 6px rgba(192, 230, 245, 0.6); }
+
+.card[data-phase="Market Plan - Launch Plan"] { border-left-color: #F2CEEF; background: linear-gradient(135deg, #fff7fd, #ffffff); }
+.card[data-phase="Market Plan - Launch Plan"]:hover { box-shadow: 0 10px 20px rgba(242, 206, 239, 0.5), 0 6px 6px rgba(242, 206, 239, 0.6); }
+
+.card[data-phase="Launch Plan - Go"] { border-left-color: #FBE2D5; background: linear-gradient(135deg, #fffaf8, #ffffff); }
+.card[data-phase="Launch Plan - Go"]:hover { box-shadow: 0 10px 20px rgba(251, 226, 213, 0.5), 0 6px 6px rgba(251, 226, 213, 0.6); }
+
+/* Highlighting state for legend interaction */
+.kanban-board.highlight-active .card {
+    opacity: 0.3;
+    filter: grayscale(80%);
+    transform: scale(0.95);
+}
+
+.kanban-board.highlight-active .card.highlight {
+    opacity: 1;
+    filter: grayscale(0);
+    transform: scale(1.03);
+    box-shadow: 0 10px 30px rgba(0, 86, 179, 0.25);
+}
+
+/* List View Placeholder */
+#list-view p {
+    font-size: 1.2rem;
+    text-align: center;
+    padding: 40px;
+}
+
+#list-view .list-table {
+    width: 100%;
+} 

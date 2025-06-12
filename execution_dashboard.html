@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新产品准入流程 - 执行视角仪表板</title>
+    <script src="scripts/echarts@5.4.3.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #003c71 60%, #bb33ff 85%, #00efff 100%);
+            color: #fff;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            grid-template-rows: auto auto 1fr auto;
+            gap: 20px;
+            height: calc(100vh - 40px);
+        }
+        
+        .header {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: auto auto 1fr;
+            gap: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            height: 63px;
+        }
+        
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .search-input {
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            width: 250px;
+        }
+        
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .search-button {
+            background: rgba(255, 255, 255, 0.3);
+            border: none;
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .search-button:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+        
+        .task-cards {
+            grid-column: 1 / 2;
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            height: 160px;
+        }
+        
+        .task-card {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .task-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .task-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 8px 0;
+        }
+        
+        .task-label {
+            font-size: 16px;
+            opacity: 0.8;
+        }
+        
+        .task-meta {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .todo-section .task-title {
+            font-size: 14px;
+        }
+        .todo-section .task-meta {
+            font-size: 12px;
+        }
+        
+        .task-status {
+            align-self: center;
+        }
+        
+        .task-status-chart {
+            grid-column: 2;
+            grid-row: 2;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            height: 160px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chart-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chart-title {
+            font-size: 16px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chart-actions {
+            font-size: 12px;
+            opacity: 0.7;
+            cursor: pointer;
+        }
+        
+        .chart {
+            flex: 1;
+            width: 100%;
+            height: calc(100% - 30px);
+        }
+        
+        .main-area {
+            grid-column: 1;
+            grid-row: 3;
+        }
+        
+        .side-area {
+            grid-column: 2;
+            grid-row: 3;
+        }
+        
+        .bottom-area {
+            grid-column: 1 / -1;
+            grid-row: 4;
+        }
+        
+        .product-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        .product-table th,
+        .product-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .product-table th {
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .product-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            background: #7fb883;
+        }
+        
+        .status-badge.warning {
+            background: #d4a05a;
+        }
+        
+        .status-badge.danger {
+            background: #c76d67;
+        }
+        
+        .status-badge.info {
+            background: #6d9cc7;
+        }
+        
+        .action-button {
+            padding: 3px 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            margin-right: 5px;
+            font-size: 12px;
+        }
+        
+        .action-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            width: 100%;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #4caf50;
+            border-radius: 4px;
+        }
+        
+        .task-list {
+            margin-top: 10px;
+        }
+        
+        .task-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .task-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .task-info {
+            flex: 1;
+        }
+        
+        .task-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .task-meta {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .task-status {
+            align-self: center;
+        }
+        
+        .combined-area {
+            grid-column: 2;
+            grid-row: 2 / 4;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .pie-section {
+            flex: 1;
+            min-height: 160px;
+        }
+        
+        .todo-section {
+            flex: 1;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="header">
+            <img loading="lazy" src="resources/BS-logo-cn.png" alt="Boston Scientific Logo" style="width: auto; height: 33px;">
+            <div class="title">新产品准入流程 - 执行视角</div>
+            <div class="search-bar" style="justify-self: end;">
+                <input type="text" class="search-input" placeholder="搜索产品名称、负责人...">
+                <button class="search-button">搜索</button>
+            </div>
+        </div>
+        
+        <div class="task-cards">
+            <div class="task-card">
+                <div class="task-label">我的待办</div>
+                <div class="task-value">24</div>
+                <div class="task-meta">较上周增加3项</div>
+            </div>
+            <div class="task-card">
+                <div class="task-label">即将到期</div>
+                <div class="task-value">8</div>
+                <div class="task-meta">3项高优先级</div>
+            </div>
+            <div class="task-card">
+                <div class="task-label">已逾期</div>
+                <div class="task-value">5</div>
+                <div class="task-meta">较上周减少2项</div>
+            </div>
+            <div class="task-card">
+                <div class="task-label">本周完成</div>
+                <div class="task-value">12</div>
+                <div class="task-meta">完成率85%</div>
+            </div>
+        </div>
+
+        <div class="combined-area">
+            <div class="pie-section">
+                <div class="chart-title">
+                    <span>任务状态分布</span>
+                    <span class="chart-actions">导出 | 详情</span>
+                </div>
+                <div class="chart" id="pie-chart"></div>
+            </div>
+            <div class="todo-section">
+                <div class="chart-title">
+                    <span>我的待办任务</span>
+                    <span class="chart-actions">全部 | 筛选</span>
+                </div>
+                <div class="task-list">
+                    <div class="task-item">
+                        <div class="task-info">
+                            <div class="task-title">Rubicon - Material Master Data Setup</div>
+                            <div class="task-meta">截止日期: 2023-06-15</div>
+                        </div>
+                        <div class="task-status">
+                            <span class="status-badge danger">紧急</span>
+                        </div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-info">
+                            <div class="task-title">Opticross 18 - Marketing Plan Execution</div>
+                            <div class="task-meta">截止日期: 2023-06-20</div>
+                        </div>
+                        <div class="task-status">
+                            <span class="status-badge warning">重要</span>
+                        </div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-info">
+                            <div class="task-title">Enhance Victory - Registration Kickoff</div>
+                            <div class="task-meta">截止日期: 2023-06-25</div>
+                        </div>
+                        <div class="task-status">
+                            <span class="status-badge info">普通</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-area">
+            <div class="chart-container">
+                <div class="chart-title">
+                    <span>产品准入流程状态</span>
+                    <span class="chart-actions">导出 | 详情</span>
+                </div>
+                <div class="chart" id="sankey-chart"></div>
+            </div>
+        </div>
+
+        <div class="bottom-area">
+            <div class="chart-container">
+                <div class="chart-title">
+                    <span>产品准入状态</span>
+                    <span class="chart-actions">导出 | 筛选</span>
+                </div>
+                <table class="product-table">
+                    <thead>
+                        <tr>
+                            <th>产品名称</th>
+                            <th>当前阶段</th>
+                            <th>负责人</th>
+                            <th>开始日期</th>
+                            <th>预计完成</th>
+                            <th>完成率</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Rubicon</td>
+                            <td>Launch Plan - Go</td>
+                            <td>张三</td>
+                            <td>2023-01-15</td>
+                            <td>2023-07-20</td>
+                            <td>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 65%;"></div>
+                                </div>
+                            </td>
+                            <td><span class="status-badge danger">延迟</span></td>
+                            <td>
+                                <button class="action-button">详情</button>
+                                <button class="action-button">更新</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Opticross 18</td>
+                            <td>Market Plan - Launch Plan</td>
+                            <td>李四</td>
+                            <td>2023-02-10</td>
+                            <td>2023-08-15</td>
+                            <td>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 45%;"></div>
+                                </div>
+                            </td>
+                            <td><span class="status-badge warning">风险</span></td>
+                            <td>
+                                <button class="action-button">详情</button>
+                                <button class="action-button">更新</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Enhance Victory</td>
+                            <td>Registration</td>
+                            <td>王五</td>
+                            <td>2023-03-05</td>
+                            <td>2023-09-10</td>
+                            <td>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 30%;"></div>
+                                </div>
+                            </td>
+                            <td><span class="status-badge">正常</span></td>
+                            <td>
+                                <button class="action-button">详情</button>
+                                <button class="action-button">更新</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>WATCHMAN FLX Pro</td>
+                            <td>Business Plan - PLT validation</td>
+                            <td>赵六</td>
+                            <td>2023-04-20</td>
+                            <td>2023-10-25</td>
+                            <td>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 20%;"></div>
+                                </div>
+                            </td>
+                            <td><span class="status-badge">正常</span></td>
+                            <td>
+                                <button class="action-button" onclick="window.open('NPL project detail.html', '_blank')">详情</button>
+                                <button class="action-button">更新</button>
+                            </td>
+                        </tr>
+                        <!--<tr>
+                            <td>泌尿导管U500</td>
+                            <td>早期参与</td>
+                            <td>孙七</td>
+                            <td>2023-05-15</td>
+                            <td>2023-11-30</td>
+                            <td>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 10%;"></div>
+                                </div>
+                            </td>
+                            <td><span class="status-badge info">新建</span></td>
+                            <td>
+                                <button class="action-button">详情</button>
+                                <button class="action-button">更新</button>
+                            </td>
+                        </tr>-->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化所有图表
+        document.addEventListener('DOMContentLoaded', function() {
+            // 产品流程泳道图
+            const sankeyChart = echarts.init(document.getElementById('sankey-chart'));
+            // A Sankey diagram is used to visualize flow. For project management, where parallel tasks
+            // are performed on the same set of projects, this creates a challenge. A true dependency
+            // graph (like Gantt or PERT) is different from a flow diagram. Here, we are using the Sankey
+            // diagram to represent the number of projects moving through stages. When the process branches
+            // into parallel tasks, we split the project count (`value`) to maintain the flow visualization,
+            // even though the same projects are actually undergoing all parallel tasks. The values are
+            // illustrative of project attrition.
+            const sankeyOption = {
+                tooltip: {
+                    trigger: 'item',
+                    triggerOn: 'mousemove',
+                    formatter: function(params) {
+                        if (params.dataType === 'node') {
+                            return `${params.name}`; // Show full name and value on node hover
+                        }
+                        // For links, show source, target, and value
+                        return `${params.data.source} → ${params.data.target}<br/>项目数: ${params.data.value}`;
+                    }
+                },
+                series: [
+                    {
+                        type: 'sankey',
+                        left: '2%',
+                        right: '5%',
+                        top: '5%',
+                        bottom: '5%',
+                        nodeAlign: 'justify',
+                        nodeLayout: 'none',
+                        emphasis: {
+                            focus: 'adjacency'
+                        },
+                        label: {
+                            color: '#fff',
+                            fontFamily: 'Microsoft YaHei',
+                            fontSize: 12,
+                            formatter: function(params) {
+                                // Display only the task number, e.g., "1.1" or "Start"
+                                return params.name.split(' ')[0];
+                            }
+                        },
+                        lineStyle: {
+                            color: 'gradient',
+                            curveness: 0.5
+                        },
+                        itemStyle: {
+                            borderWidth: 1,
+                            borderColor: '#aaa'
+                        },
+                        data: [
+                            { name: 'Start',                                 x: 0,    y: 50 },
+                            
+                            // Stage 1
+                            { name: '1.1 Registration Strategy',             x: 10,   y: 20 },
+                            { name: '1.2 New Product Marketing Report',      x: 10,   y: 80 },
+                            { name: '1.3 Business Case Preparation',         x: 20,   y: 50 },
+                            { name: '1.4 Business Case Ready',               x: 30,   y: 50 },
+                            { name: '1.5 Business Case Review in PLT',       x: 40,   y: 50 },
+                            { name: '1.6 Business Case Approval',            x: 50,   y: 50 },
+                            
+                            // Stage 2 (top track)
+                            { name: '2.1 Registration Kickoff',              x: 60,   y: 15 },
+                            { name: '2.2 Registration RPMS & EMARS',         x: 70,   y: 15 },
+                            { name: '2.3 License Release',                   x: 80,   y: 15 },
+                            
+                            // Stage 3 (bottom track)
+                            { name: '3.1 Initiate Marketing Plan',           x: 60,   y: 85 },
+                            { name: '3.2 Selling Price Proposal',            x: 65,   y: 70 },
+                            { name: '3.6 Marketing Plan Review',             x: 65,   y: 90 },
+                            { name: '3.3 Sales Incentive Approval',          x: 70,   y: 65 },
+                            { name: '3.4 Commercial Policy Approval',        x: 70,   y: 75 },
+                            { name: '3.5 Selling Price Approval',            x: 75,   y: 70 },
+                            { name: '3.7 Marketing Plan Approval',           x: 80,   y: 80 },
+                            { name: '3.8 Final Launch Plan Approval',        x: 85,   y: 80 },
+                            { name: '3.9 Marketing Plan Execution',          x: 90,   y: 75 },
+                            { name: '3.10 Demand Forecast',                  x: 90,   y: 85 },
+
+                            // Stage 4 (merge and final steps)
+                            { name: '4.1 Operation & System Preparation',    x: 92,   y: 50 },
+                            { name: '4.2 Importation Preparation',           x: 94,   y: 10 },
+                            { name: '4.3 Localization Preparation',          x: 94,   y: 25 },
+                            { name: '4.4 Material Master Data Setup',        x: 94,   y: 40 },
+                            { name: '4.5 Selling Price Setup',               x: 94,   y: 60 },
+                            { name: '4.6 Channel Distribution Preparation',  x: 94,   y: 75 },
+                            { name: '4.7 Start to Manufacture & Import',     x: 96,   y: 25 },
+                            { name: '4.8 Localization & Distribute to Dealers', x: 98, y: 50 },
+                            
+                            { name: 'Launched',                              x: 100,  y: 50 }
+                        ],
+                        links: [
+                            // Start -> Stage 1
+                            { source: 'Start', target: '1.1 Registration Strategy', value: 70 },
+                            { source: 'Start', target: '1.2 New Product Marketing Report', value: 55 },
+                            
+                            // Stage 1
+                            { source: '1.1 Registration Strategy', target: '1.3 Business Case Preparation', value: 60 },
+                            { source: '1.2 New Product Marketing Report', target: '1.3 Business Case Preparation', value: 50 },
+                            { source: '1.3 Business Case Preparation', target: '1.4 Business Case Ready', value: 45 },
+                            { source: '1.4 Business Case Ready', target: '1.5 Business Case Review in PLT', value: 40 },
+                            { source: '1.5 Business Case Review in PLT', target: '1.6 Business Case Approval', value: 40 },
+                            
+                            // Stage 1 -> Stage 2 & 3
+                            { source: '1.6 Business Case Approval', target: '2.1 Registration Kickoff', value: 30 },
+                            { source: '1.6 Business Case Approval', target: '3.1 Initiate Marketing Plan', value: 35 },
+                            
+                            // Stage 2
+                            { source: '2.1 Registration Kickoff', target: '2.2 Registration RPMS & EMARS', value: 30 },
+                            { source: '2.2 Registration RPMS & EMARS', target: '2.3 License Release', value: 30 },
+                            
+                            // Stage 3
+                            { source: '3.1 Initiate Marketing Plan', target: '3.2 Selling Price Proposal', value: 30 },
+                            { source: '3.1 Initiate Marketing Plan', target: '3.6 Marketing Plan Review', value: 25 },
+                            { source: '3.2 Selling Price Proposal', target: '3.3 Sales Incentive Approval', value: 10 },
+                            { source: '3.2 Selling Price Proposal', target: '3.4 Commercial Policy Approval', value: 10 },
+                            { source: '3.3 Sales Incentive Approval', target: '3.5 Selling Price Approval', value: 10 },
+                            { source: '3.4 Commercial Policy Approval', target: '3.5 Selling Price Approval', value: 10 },
+                            { source: '3.5 Selling Price Approval', target: '3.7 Marketing Plan Approval', value: 20 },
+                            { source: '3.6 Marketing Plan Review', target: '3.7 Marketing Plan Approval', value: 20 },
+                            { source: '3.7 Marketing Plan Approval', target: '3.8 Final Launch Plan Approval', value: 18 },
+                            { source: '3.8 Final Launch Plan Approval', target: '3.9 Marketing Plan Execution', value: 19 },
+                            { source: '3.8 Final Launch Plan Approval', target: '3.10 Demand Forecast', value: 19 },
+
+                            // Stage 2/3 -> Stage 4
+                            { source: '2.3 License Release', target: '4.1 Operation & System Preparation', value: 20 },
+                            { source: '3.9 Marketing Plan Execution', target: '4.1 Operation & System Preparation', value: 19 },
+                            { source: '3.10 Demand Forecast', target: '4.1 Operation & System Preparation', value: 19 },
+                            
+                            // Stage 4
+                            { source: '4.1 Operation & System Preparation', target: '4.2 Importation Preparation', value: 15 },
+                            { source: '4.1 Operation & System Preparation', target: '4.3 Localization Preparation', value: 15 },
+                            { source: '4.1 Operation & System Preparation', target: '4.4 Material Master Data Setup', value: 15 },
+                            { source: '4.1 Operation & System Preparation', target: '4.5 Selling Price Setup', value: 15 },
+                            { source: '4.1 Operation & System Preparation', target: '4.6 Channel Distribution Preparation', value: 18 },
+                            { source: '4.2 Importation Preparation', target: '4.7 Start to Manufacture & Import', value: 15 },
+                            { source: '4.3 Localization Preparation', target: '4.7 Start to Manufacture & Import', value: 15 },
+                            { source: '4.4 Material Master Data Setup', target: '4.7 Start to Manufacture & Import', value: 15 },
+                            { source: '4.5 Selling Price Setup', target: '4.8 Localization & Distribute to Dealers', value: 15 },
+                            { source: '4.6 Channel Distribution Preparation', target: '4.8 Localization & Distribute to Dealers', value: 10 },
+                            { source: '4.7 Start to Manufacture & Import', target: '4.8 Localization & Distribute to Dealers', value: 8 },
+                            
+                            // End
+                            { source: '4.8 Localization & Distribute to Dealers', target: 'Launched', value: 5 }
+                        ]
+                    }
+                ]
+            };
+            sankeyChart.setOption(sankeyOption);
+            
+            // 任务状态分布饼图
+            const pieChart = echarts.init(document.getElementById('pie-chart'));
+            const pieOption = {
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{a} <br/>{b}: {c} ({d}%)'
+                },
+                legend: {
+                    orient: 'vertical',
+                    left: '5%',
+                    top: 'middle',
+                    itemGap: 10,
+                    data: ['未开始', '进行中', '已完成', '已延期'],
+                    textStyle: {
+                        color: '#ddd',
+                        fontSize: 12
+                    }
+                },
+                series: [
+                    {
+                        name: '任务状态',
+                        type: 'pie',
+                        radius: ['45%', '75%'],
+                        center: ['65%', '50%'],
+                        avoidLabelOverlap: false,
+                        label: {
+                            show: true,
+                            position: 'outside',
+                            formatter: '{d}%',
+                            color: '#fff',
+                            fontSize: 12
+                        },
+                        emphasis: {
+                            label: {
+                                show: true,
+                                fontSize: '14',
+                                fontWeight: 'bold',
+                                color: '#fff'
+                            }
+                        },
+                        labelLine: {
+                            show: true,
+                            length: 10,
+                            length2: 15,
+                            lineStyle: {
+                                color: '#ddd'
+                            }
+                        },
+                        data: [
+                            { value: 15, name: '未开始', itemStyle: { color: '#6d9cc7' } },
+                            { value: 30, name: '进行中', itemStyle: { color: '#d4a05a' } },
+                            { value: 40, name: '已完成', itemStyle: { color: '#7fb883' } },
+                            { value: 15, name: '已延期', itemStyle: { color: '#c76d67' } }
+                        ]
+                    }
+                ]
+            };
+            pieChart.setOption(pieOption);
+            
+            // 窗口大小变化时重新调整图表大小
+            window.addEventListener('resize', function() {
+                sankeyChart.resize();
+                pieChart.resize();
+            });
+        });
+    </script>
+</body>
+</html>
