@@ -427,6 +427,66 @@
         .skeleton-row .sk-text-short { height: 20px; width: 15%; }
         .skeleton-row .sk-pill { height: 28px; width: 120px; border-radius: 999px;}
         .skeleton-row .sk-icon { height: 24px; width: 24px; }
+
+        /* Associated Tasks Styles */
+        .associated-tasks-list {
+            list-style: none;
+            padding: 0;
+            margin: 0.5rem 0 0 0;
+        }
+        
+        .associated-tasks-list li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .task-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            background-color: #F8F9FA;
+            border: 1px solid #E5E7EB;
+            border-radius: 6px;
+            text-decoration: none;
+            color: #374151;
+            transition: all 0.2s ease;
+        }
+        
+        .task-link:hover {
+            background-color: #E3F2FD;
+            border-color: #2563EB;
+            color: #1D4ED8;
+        }
+        
+        .task-link i {
+            color: #6B7280;
+            font-size: 1rem;
+        }
+        
+        .task-link:hover i {
+            color: #2563EB;
+        }
+        
+        .task-link span {
+            font-weight: 500;
+        }
+        
+        .no-tasks {
+            color: #6B7280;
+            font-style: italic;
+            margin: 0.5rem 0;
+        }
+        
+        .no-documents, .no-comments {
+            color: #6B7280;
+            font-style: italic;
+            text-align: center;
+            padding: 1rem;
+        }
+        
+        .no-documents {
+            list-style: none;
+        }
     </style>
 </head>
 <body>
@@ -1021,7 +1081,9 @@
                 <div class="info-section">
                     <h3>关联任务</h3>
                     <p>此交付物与以下任务相关联...</p>
-                    <!-- Associated tasks can be listed here -->
+                    <div id="associatedTasksContainer">
+                        <!-- Associated tasks will be dynamically populated by JavaScript -->
+                    </div>
                 </div>
             </div>
             <!-- Right Pane: Interaction -->
@@ -1436,8 +1498,188 @@
             const phaseColor = getComputedStyle(document.documentElement).getPropertyValue(`--pill-${data.phase.toLowerCase().replace(/ /g, '-').replace(/---/g, '-')}-bg`);
             phasePill.style.backgroundColor = phaseColor || '#E5E7EB';
 
+            // Populate associated tasks based on deliverable name
+            populateAssociatedTasks(data.name);
+            
+            // Populate submitted documents, comments and history based on deliverable name
+            populateModalContent(data.name);
+
             openModal();
         }
+
+                 function populateAssociatedTasks(deliverableName) {
+             const associatedTasksContainer = document.getElementById('associatedTasksContainer');
+             
+             // Define which deliverables should show the marketing report task
+             const deliverablesWithMarketingTask = [
+                 'Competitive landscape & summary',
+                 'Customer Strategy and VOC'
+             ];
+             
+             if (deliverablesWithMarketingTask.includes(deliverableName)) {
+                 associatedTasksContainer.innerHTML = `
+                     <ul class="associated-tasks-list">
+                         <li>
+                             <a href="NPL project detail.html#task-1-2" class="task-link">
+                                 <i class="ri-task-line"></i>
+                                 <span>1.2 New Product Marketing Report</span>
+                             </a>
+                         </li>
+                     </ul>
+                 `;
+             } else {
+                 associatedTasksContainer.innerHTML = '<p class="no-tasks">暂无关联任务</p>';
+             }
+         }
+
+         function populateModalContent(deliverableName) {
+             // Get DOM elements
+             const submittedDocsList = document.querySelector('.submitted-docs-list ul');
+             const commentsContainer = document.querySelector('#comments .comment-list');
+             const historyContainer = document.querySelector('#history .history-timeline');
+             
+             // Define content for different deliverables
+             const deliverableContent = {
+                 'Competitive landscape & summary': {
+                     documents: [
+                         {
+                             icon: 'ri-file-word-2-line',
+                             iconClass: 'word',
+                             filename: 'Competitive_Landscape_v2.docx',
+                             author: '张晓芳',
+                             date: '2023-05-20'
+                         },
+                         {
+                             icon: 'ri-file-excel-2-line',
+                             iconClass: 'excel',
+                             filename: 'Market_Share_Analysis.xlsx',
+                             author: '李娜',
+                             date: '2023-05-18'
+                         }
+                     ],
+                     comments: [
+                         {
+                             avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+                             author: '刘军',
+                             timestamp: '3天前',
+                             content: '报告中缺少了对竞品X的分析，请补充。'
+                         },
+                         {
+                             avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
+                             author: '张晓芳',
+                             timestamp: '2天前',
+                             content: '@刘军 已在V2版本中更新，请查阅。'
+                         }
+                     ],
+                     history: [
+                         {
+                             actor: '张晓芳',
+                             action: '上传了新版本',
+                             file: 'Competitive_Landscape_v2.docx',
+                             timestamp: '2023-05-20 10:45'
+                         },
+                         {
+                             actor: '李娜',
+                             action: '上传了文件',
+                             file: 'Market_Share_Analysis.xlsx',
+                             timestamp: '2023-05-18 16:21'
+                         },
+                         {
+                             actor: '系统',
+                             action: '创建了此交付物卡片',
+                             file: null,
+                             timestamp: '2023-04-01 09:00'
+                         }
+                     ]
+                 },
+                 'Customer Strategy and VOC': {
+                     documents: [
+                         {
+                             icon: 'ri-file-excel-2-line',
+                             iconClass: 'excel',
+                             filename: 'CustomerStrategy&VOC_v2.xlsx',
+                             author: '王美丽',
+                             date: '2023-05-22'
+                         }
+                     ],
+                     comments: [
+                         {
+                             avatar: 'https://randomuser.me/api/portraits/women/25.jpg',
+                             author: '王美丽',
+                             timestamp: '1天前',
+                             content: '已完成客户策略分析，请查阅最新版本。'
+                         }
+                     ],
+                     history: [
+                         {
+                             actor: '王美丽',
+                             action: '上传了文件',
+                             file: 'CustomerStrategy&VOC_v2.xlsx',
+                             timestamp: '2023-05-22 14:30'
+                         },
+                         {
+                             actor: '系统',
+                             action: '创建了此交付物卡片',
+                             file: null,
+                             timestamp: '2023-04-01 09:00'
+                         }
+                     ]
+                 }
+             };
+             
+             const content = deliverableContent[deliverableName];
+             
+             // Populate submitted documents
+             if (content && content.documents.length > 0) {
+                 submittedDocsList.innerHTML = content.documents.map(doc => `
+                     <li>
+                         <i class="doc-icon ${doc.iconClass} ${doc.icon}"></i>
+                         <div class="doc-details">
+                             <div class="filename">${doc.filename}</div>
+                             <div class="meta">由 <strong>${doc.author}</strong> 于 ${doc.date} 上传</div>
+                         </div>
+                         <div class="doc-actions">
+                             <button title="Preview"><i class="ri-eye-line"></i></button>
+                             <button title="Download"><i class="ri-download-cloud-2-line"></i></button>
+                         </div>
+                     </li>
+                 `).join('');
+             } else {
+                 submittedDocsList.innerHTML = '<li class="no-documents">暂无已提交文档</li>';
+             }
+             
+             // Populate comments
+             if (content && content.comments.length > 0) {
+                 commentsContainer.innerHTML = content.comments.map(comment => `
+                     <div class="comment">
+                         <div class="comment-avatar"><img src="${comment.avatar}" alt=""></div>
+                         <div class="comment-main">
+                             <div class="comment-header">
+                                 <span class="author">${comment.author}</span>
+                                 <span class="timestamp">${comment.timestamp}</span>
+                             </div>
+                             <p class="comment-body">${comment.content}</p>
+                         </div>
+                     </div>
+                 `).join('');
+             } else {
+                 commentsContainer.innerHTML = '<div class="no-comments">暂无评论</div>';
+             }
+             
+             // Populate history
+             if (content && content.history.length > 0) {
+                 historyContainer.innerHTML = content.history.map(item => `
+                     <li class="history-item">
+                         <div class="history-content">
+                             <span class="actor">${item.actor}</span> ${item.action} ${item.file ? `<span class="file">"${item.file}"</span>` : ''}.
+                             <span class="timestamp">${item.timestamp}</span>
+                         </div>
+                     </li>
+                 `).join('');
+             } else {
+                 historyContainer.innerHTML = '<li class="history-item"><div class="history-content">暂无历史记录</div></li>';
+             }
+         }
 
         function setupEventListeners() {
             // Filters
@@ -1552,6 +1794,12 @@
                 phasePill.textContent = phase;
                 const phaseColor = getComputedStyle(document.documentElement).getPropertyValue(`--pill-${phase.toLowerCase().replace(/ /g, '-').replace(/---/g, '-')}-bg`);
                 phasePill.style.backgroundColor = phaseColor || '#E5E7EB';
+
+                // Populate associated tasks based on deliverable name
+                populateAssociatedTasks(title);
+                
+                // Populate submitted documents, comments and history based on deliverable name
+                populateModalContent(title);
 
                 openModal();
             });
